@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="16" tileheight="16" nextobjectid="11">
+ <tileset firstgid="1" name="prototype" tilewidth="16" tileheight="16" tilecount="1000" columns="40">
+  <image source="../art/apocalypse.png" width="640" height="400"/>
+ </tileset>
+ <tileset firstgid="1001" name="7DRL-Tiles2" tilewidth="16" tileheight="16" tilecount="256" columns="16">
+  <image source="../art/7DRL-Tiles2.png" width="256" height="256"/>
+ </tileset>
+ <tileset firstgid="1257" name="WallSet" tilewidth="16" tileheight="16" tilecount="16" columns="4">
+  <image source="../art/WallSet.png" trans="ffffff" width="64" height="64"/>
+ </tileset>
+ <tileset firstgid="1273" name="misc" tilewidth="16" tileheight="16" tilecount="49" columns="7">
+  <image source="../art/misc.png" trans="ffffff" width="112" height="112"/>
+ </tileset>
+ <tileset firstgid="1322" name="AngryMeteor-expansion-sprites14c" tilewidth="16" tileheight="16" spacing="2" margin="1" tilecount="300" columns="15">
+  <image source="../art/AngryMeteor-expansion-sprites14c.png" trans="ffffff" width="270" height="360"/>
+ </tileset>
+ <layer name="background" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJztwwEJAAAMA6C91fonW4+jYC+pqqqq+voAPv7kAQ==
+  </data>
+ </layer>
+ <layer name="ground" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJztlO0NgjAURZ/Q3+oc6gJOoAKaOInfDoGiP3Ub3UaX8OOS0EiqSC0FjPYkJ01eSm5faUtk+Gc6FlEX9qATG13owT4caKgnzRvBMZzAaWycwTlcwKWGetK8Hdxb5e3/AdlHk2/yBXxGtIJrGMAN3LLi8oui7P5PyD7n+O6l1Ws2Ud3O791Lq/8afnRmQgKJMzNkn/vN8HvDTeq/KtlHA/Oab2wp7odsvsjVVvsuS/5FyNSxBpX+X+WKa8srn2eHIzcLqv9fB+3KwzQcrNONDHHZs55kL/Fc2XydlJ1vKI6b5P28A7wTXtc=
+  </data>
+ </layer>
+ <layer name="ground_2" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJxjYKA++M1MA0OpDPC5MYcFgnOhmFr2/RkC4TIKBifAll4JpSlq5UNapFtS3QZTD3ILPr24wmkoglwWRFmUQ6VyaLCC93SII3zp4P8gSiMirNRRQwsgPED2YgO44jOXQN39DyguNQT8MZBgMLoJBHgGKN6Q60BS8wAhNxMb1myDKM0OBHBggWBqAD6gOdXUMYpogGwfyP6B6g9UQ+0fBbQD9GjPUAMAALLwIXY=
+  </data>
+ </layer>
+ <layer name="structures" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJzNlklPFEEUx6uXmyuoB7cPgMtJ0Ch68CO4nGAGt5ODhoMmGkU9YCLqSQZMPLucVdxPKIP6MUzcgGlM9KBXf5VUZV7X9Mz0MM3AS37p2vr9X1f1qyqlVpad9JQ65VXqpymfMfXJUKkX8BrewEt4FWarP+pVt901bdNoleATfIYZ+NiifhQoVTbo8lO0cjBgyMNkQkztNB1bK/1ZW7v12mEFX6lBf/n0x9AuLqP+SrM+8rofcpCHATghct1jrnwIIFyCeSsk7CtDoq0LzR2wE3YZ/Qn67zfYj77Bd/gBP+uMu4KfqzAM1+A63BC+j6B5FI7BcaP/mP4nDfRXs5etgbWwLsN9ze6hbr1IPOMipm40e2Av7HP0LzHu8iL387P4KsCg4/Mh/h6l9HmLcaPOWBt/o7W9h+4YFDM+K2z8adZWW5/JGW15J2e02fPdnuuHw+apZ27eDDl1fb7fhjte5VzP0mzePEjIGW36fH8Gz1Oc65t5dwtsrcM22J7xHchaV4LfXwln7+4l1l8I4tpuDFpf5vmXFvbj3/j+E8T1rUldW9axaX2bJ1GLdxMPH35YrS+/3WLtUIbz34GvzgT9NPaX8fNQhjlDWdRt37+Ufvcz7gD0CrT1Om0Hm4jzHDl3XuTdFLyHDzDtlEtOecbxdQHdi0bbnj2N7qbjaE8I/VmYg3n9rnlGpk2267YFx9cI2jeN/h7++W7o8Zu7H0fGv9S2eq6+fso5kP96P7o5yAt92T+lque2ZPzLb40ESfqRiq/FVy++DlEQx5o7z5Hj07a7Y2rFYNdilV9Zh3r3h1nxvvWpnx3E3wkbYKNXu+62bxL/0FvK77zk+4O19TV8/wdyccgb
+  </data>
+ </layer>
+ <layer name="triggers" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJxjYBh4EMo60C5ABQZA9+SyItjDHeSOAD/iArdYMfFAu2ck2Y8t/EdyeiQGjIbPKBgFuMFIqrtpDbCFYSYrBFMLkGMetd1ALyA3BN1MSwBra+ci1ftDNW6HWr1MiXsJ6R1qYTFSAQCSwxTD
+  </data>
+ </layer>
+</map>
