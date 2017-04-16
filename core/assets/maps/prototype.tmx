@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="16" tileheight="16" nextobjectid="11">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="16" tileheight="16" nextobjectid="18">
  <tileset firstgid="1" name="prototype" tilewidth="16" tileheight="16" tilecount="1000" columns="40">
   <image source="../art/apocalypse.png" width="640" height="400"/>
  </tileset>
@@ -20,7 +20,7 @@
    eJztwwEJAAAMA6C91fonW4+jYC+pqqqq+voAPv7kAQ==
   </data>
  </layer>
- <layer name="ground" width="32" height="32">
+ <layer name="ground_1" width="32" height="32">
   <data encoding="base64" compression="zlib">
    eJztlO0NgjAURZ/Q3+oc6gJOoAKaOInfDoGiP3Ub3UaX8OOS0EiqSC0FjPYkJ01eSm5faUtk+Gc6FlEX9qATG13owT4caKgnzRvBMZzAaWycwTlcwKWGetK8Hdxb5e3/AdlHk2/yBXxGtIJrGMAN3LLi8oui7P5PyD7n+O6l1Ws2Ud3O791Lq/8afnRmQgKJMzNkn/vN8HvDTeq/KtlHA/Oab2wp7odsvsjVVvsuS/5FyNSxBpX+X+WKa8srn2eHIzcLqv9fB+3KwzQcrNONDHHZs55kL/Fc2XydlJ1vKI6b5P28A7wTXtc=
   </data>
@@ -40,4 +40,9 @@
    eJxjYBh4EMo60C5ABQZA9+SyItjDHeSOAD/iArdYMfFAu2ck2Y8t/EdyeiQGjIbPKBgFuMFIqrtpDbCFYSYrBFMLkGMetd1ALyA3BN1MSwBra+ci1ftDNW6HWr1MiXsJ6R1qYTFSAQCSwxTD
   </data>
  </layer>
+ <objectgroup name="spawn">
+  <object id="11" name="PLAYER" x="392" y="504"/>
+  <object id="12" name="ENEMY" x="279" y="7"/>
+  <object id="13" name="GOAL" x="27" y="26"/>
+ </objectgroup>
 </map>
