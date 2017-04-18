@@ -41,8 +41,8 @@
   </data>
  </layer>
  <objectgroup name="positions">
-  <object id="11" name="PLAYER" x="392" y="504"/>
-  <object id="12" name="ENEMY" x="279" y="7"/>
-  <object id="13" name="GOAL" x="27" y="26"/>
+  <object id="11" name="PLAYER" x="384" y="496" width="16" height="16"/>
+  <object id="12" name="ENEMY" x="272" y="0" width="16" height="16"/>
+  <object id="13" name="GOAL" x="16" y="16" width="16" height="16"/>
  </objectgroup>
 </map>
