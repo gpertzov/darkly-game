@@ -40,7 +40,7 @@
    eJxjYBh4EMo60C5ABQZA9+SyItjDHeSOAD/iArdYMfFAu2ck2Y8t/EdyeiQGjIbPKBgFuMFIqrtpDbCFYSYrBFMLkGMetd1ALyA3BN1MSwBra+ci1ftDNW6HWr1MiXsJ6R1qYTFSAQCSwxTD
   </data>
  </layer>
- <objectgroup name="spawn">
+ <objectgroup name="positions">
   <object id="11" name="PLAYER" x="392" y="504"/>
   <object id="12" name="ENEMY" x="279" y="7"/>
   <object id="13" name="GOAL" x="27" y="26"/>

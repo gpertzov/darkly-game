@@ -17,8 +17,8 @@ public class GameScreen extends ScreenAdapter {
     private static final int VIEWPORT_WIDTH = 16;
     private static final int VIEWPORT_HEIGHT = 16;
     private static final float UNIT_SCALE = 1 / 16f;
-    private static final String SPAWN_LAYER = "spawn";
-    private static final String PLAYER_SPAWN = "PLAYER";
+    private static final String POSITIONS_LAYER = "positions";
+    private static final String PLAYER_START = "PLAYER";
 
     private final DarklyGame game;
 
@@ -45,9 +45,9 @@ public class GameScreen extends ScreenAdapter {
 
         // Obtain player's start position
         playerPosition = new Vector2(0, 0);
-        MapLayer spawnLayer = map.getLayers().get(SPAWN_LAYER);
-        if (spawnLayer != null) {
-            RectangleMapObject playerStartRect = (RectangleMapObject) spawnLayer.getObjects().get(PLAYER_SPAWN);
+        MapLayer positionsLayer = map.getLayers().get(POSITIONS_LAYER);
+        if (positionsLayer != null) {
+            RectangleMapObject playerStartRect = (RectangleMapObject) positionsLayer.getObjects().get(PLAYER_START);
             if (playerStartRect != null) {
                 playerStartRect.getRectangle().getPosition(playerPosition);
             }
