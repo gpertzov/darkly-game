@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.MapLayer;
@@ -27,6 +27,7 @@ public class GameScreen extends ScreenAdapter {
 
     private OrthographicCamera camera;
     private ExtendViewport viewport;
+    private SpriteBatch batch;
     private TiledMap map;
     private OrthogonalTiledMapRenderer mapRenderer;
     private TextureAtlas sprites;
@@ -41,9 +42,12 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void show() {
+        // Init batch
+        batch = new SpriteBatch();
+
         // Load map
         map = new TmxMapLoader().load("maps/prototype.tmx");
-        mapRenderer = new OrthogonalTiledMapRenderer(map, UNIT_SCALE);
+        mapRenderer = new OrthogonalTiledMapRenderer(map, UNIT_SCALE, batch);
 
         // Setup viewport
         camera = new OrthographicCamera();
@@ -79,7 +83,6 @@ public class GameScreen extends ScreenAdapter {
         mapRenderer.render();
 
         // Render player
-        final Batch batch = mapRenderer.getBatch();
         batch.begin();
         batch.draw(playerFrame, playerPosition.x, playerPosition.y, 1, 1);
         batch.end();
@@ -94,5 +97,6 @@ public class GameScreen extends ScreenAdapter {
     public void dispose() {
         sprites.dispose();
         map.dispose();
+        batch.dispose();
     }
 }
