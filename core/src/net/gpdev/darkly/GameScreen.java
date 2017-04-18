@@ -4,6 +4,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -25,9 +28,12 @@ public class GameScreen extends ScreenAdapter {
     private OrthographicCamera camera;
     private ExtendViewport viewport;
     private TiledMap map;
-    private OrthogonalTiledMapRenderer renderer;
+    private OrthogonalTiledMapRenderer mapRenderer;
+    private TextureAtlas sprites;
 
     private Vector2 playerPosition;
+    private TextureRegion playerFrame;
+
 
     public GameScreen(final DarklyGame game) {
         this.game = game;
@@ -37,7 +43,7 @@ public class GameScreen extends ScreenAdapter {
     public void show() {
         // Load map
         map = new TmxMapLoader().load("maps/prototype.tmx");
-        renderer = new OrthogonalTiledMapRenderer(map, UNIT_SCALE);
+        mapRenderer = new OrthogonalTiledMapRenderer(map, UNIT_SCALE);
 
         // Setup viewport
         camera = new OrthographicCamera();
@@ -53,6 +59,10 @@ public class GameScreen extends ScreenAdapter {
             }
         }
         playerPosition.scl(UNIT_SCALE);
+
+        // Load sprites
+        sprites = new TextureAtlas(Gdx.files.internal("art/sprites.atlas"));
+        playerFrame = sprites.findRegion("player");
     }
 
     @Override
@@ -64,9 +74,15 @@ public class GameScreen extends ScreenAdapter {
         camera.position.set(playerPosition.x, playerPosition.y, 0f);
         viewport.apply(false);
 
-        // Render
-        renderer.setView(camera);
-        renderer.render();
+        // Render map
+        mapRenderer.setView(camera);
+        mapRenderer.render();
+
+        // Render player
+        final Batch batch = mapRenderer.getBatch();
+        batch.begin();
+        batch.draw(playerFrame, playerPosition.x, playerPosition.y, 1, 1);
+        batch.end();
     }
 
     @Override
@@ -76,6 +92,7 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void dispose() {
+        sprites.dispose();
         map.dispose();
     }
 }
