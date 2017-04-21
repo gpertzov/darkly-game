@@ -30,7 +30,7 @@ public class GameScreen extends ScreenAdapter {
     private static final String POSITIONS_LAYER = "positions";
     private static final String STRUCTURES_LAYER = "structures";
     private static final String PLAYER_START = "PLAYER";
-    private static final float ACCELERATION = 0.7f * UNIT_SCALE;
+    private static final float ACCELERATION = 2;
 
     private final DarklyGame game;
 
@@ -142,7 +142,8 @@ public class GameScreen extends ScreenAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // Update player's position // TODO - Collision Detection
-        final Vector2 nextPosition = playerPosition.cpy().add(playerVelocity);
+        final Vector2 velocity = playerVelocity.cpy().scl(delta);
+        final Vector2 nextPosition = playerPosition.cpy().add(velocity);
         nextPosition.x = clamp(nextPosition.x, 0, mapWidth - 1);
         nextPosition.y = clamp(nextPosition.y, 0, mapHeight - 1);
         playerPosition = nextPosition;
