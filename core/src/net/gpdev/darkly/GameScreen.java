@@ -30,7 +30,7 @@ public class GameScreen extends ScreenAdapter {
     private static final String POSITIONS_LAYER = "positions";
     private static final String STRUCTURES_LAYER = "structures";
     private static final String PLAYER_START = "PLAYER";
-    private static final float ACCELERATION = 2;
+    private static final float PLAYER_SPEED = 2;
 
     private final DarklyGame game;
 
@@ -93,19 +93,19 @@ public class GameScreen extends ScreenAdapter {
             @Override
             public boolean keyDown(int keycode) {
                 if (keycode == Keys.LEFT) {
-                    playerVelocity.sub(ACCELERATION, 0);
+                    playerVelocity.sub(PLAYER_SPEED, 0);
                     return true;
                 }
                 if (keycode == Keys.RIGHT) {
-                    playerVelocity.add(ACCELERATION, 0);
+                    playerVelocity.add(PLAYER_SPEED, 0);
                     return true;
                 }
                 if (keycode == Keys.UP) {
-                    playerVelocity.add(0, ACCELERATION);
+                    playerVelocity.add(0, PLAYER_SPEED);
                     return true;
                 }
                 if (keycode == Keys.DOWN) {
-                    playerVelocity.sub(0, ACCELERATION);
+                    playerVelocity.sub(0, PLAYER_SPEED);
                     return true;
                 }
                 return super.keyDown(keycode);
@@ -118,18 +118,18 @@ public class GameScreen extends ScreenAdapter {
                 }
 
                 if (keycode == Keys.LEFT) {
-                    playerVelocity.add(ACCELERATION, 0);
+                    playerVelocity.add(PLAYER_SPEED, 0);
                     return true;
                 }
                 if (keycode == Keys.RIGHT) {
-                    playerVelocity.sub(ACCELERATION, 0);
+                    playerVelocity.sub(PLAYER_SPEED, 0);
                     return true;
                 }
                 if (keycode == Keys.UP) {
-                    playerVelocity.sub(0, ACCELERATION);
+                    playerVelocity.sub(0, PLAYER_SPEED);
                 }
                 if (keycode == Keys.DOWN) {
-                    playerVelocity.add(0, ACCELERATION);
+                    playerVelocity.add(0, PLAYER_SPEED);
                 }
                 return super.keyUp(keycode);
             }
