@@ -41,6 +41,7 @@ public class GameScreen extends ScreenAdapter {
     private static final float PLAYER_HEIGHT = 16;
 
     private final DarklyGame game;
+    private GameEntity player;
 
     private OrthographicCamera camera;
     private ExtendViewport viewport;
@@ -57,13 +58,6 @@ public class GameScreen extends ScreenAdapter {
     private boolean isFlashlightOn = false;
     private float flashlightRotation = 0;
     private TextureRegion fboTexturRegion;
-
-    // Player properties // TODO - Extract to class
-    private Vector2 playerPosition;
-    private Vector2 playerVelocity;
-    private TextureRegion playerFrame;
-    private Rectangle playerBoundingBox;
-
 
     public GameScreen(final DarklyGame game) {
         this.game = game;
@@ -93,32 +87,30 @@ public class GameScreen extends ScreenAdapter {
         viewport = new ExtendViewport(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, camera);
 
         // Init player entity
-        playerPosition = getMapPosition(PLAYER_START);
-        playerPosition.scl(UNIT_SCALE);
-        playerVelocity = new Vector2(0, 0);
-        playerFrame = sprites.findRegion(PLAYER_SPRITE);
-        playerBoundingBox = new Rectangle(
-                (TILE_SIZE - PLAYER_WIDTH) / 2.0f, (TILE_SIZE - PLAYER_HEIGHT) / 2.0f,
+        final Vector2 position = getMapPosition(PLAYER_START).scl(UNIT_SCALE);
+        final TextureRegion sprite = sprites.findRegion(PLAYER_SPRITE);
+        final Rectangle boundingBox = new Rectangle((TILE_SIZE - PLAYER_WIDTH) / 2.0f, (TILE_SIZE - PLAYER_HEIGHT) / 2.0f,
                 PLAYER_WIDTH, PLAYER_HEIGHT / 2.0f);
+        player = new GameEntity(sprite, position, PLAYER_SPEED, boundingBox);
 
         // Input processing // TODO - Extract to class
         Gdx.input.setInputProcessor(new InputAdapter() {
             @Override
             public boolean keyDown(int keycode) {
                 if (keycode == Keys.LEFT) {
-                    playerVelocity.sub(PLAYER_SPEED, 0);
+                    player.updateDirection(-1f, 0);
                     return true;
                 }
                 if (keycode == Keys.RIGHT) {
-                    playerVelocity.add(PLAYER_SPEED, 0);
+                    player.updateDirection(1f, 0);
                     return true;
                 }
                 if (keycode == Keys.UP) {
-                    playerVelocity.add(0, PLAYER_SPEED);
+                    player.updateDirection(0, 1f);
                     return true;
                 }
                 if (keycode == Keys.DOWN) {
-                    playerVelocity.sub(0, PLAYER_SPEED);
+                    player.updateDirection(0, -1f);
                     return true;
                 }
                 if (keycode == Keys.SPACE) {
@@ -134,18 +126,18 @@ public class GameScreen extends ScreenAdapter {
                 }
 
                 if (keycode == Keys.LEFT) {
-                    playerVelocity.add(PLAYER_SPEED, 0);
+                    player.updateDirection(1f, 0);
                     return true;
                 }
                 if (keycode == Keys.RIGHT) {
-                    playerVelocity.sub(PLAYER_SPEED, 0);
+                    player.updateDirection(-1f, 0);
                     return true;
                 }
                 if (keycode == Keys.UP) {
-                    playerVelocity.sub(0, PLAYER_SPEED);
+                    player.updateDirection(0, -1f);
                 }
                 if (keycode == Keys.DOWN) {
-                    playerVelocity.add(0, PLAYER_SPEED);
+                    player.updateDirection(0, 1f);
                 }
                 return super.keyUp(keycode);
             }
@@ -178,21 +170,23 @@ public class GameScreen extends ScreenAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // Compute flashlight rotation
+        final Vector2 playerVelocity = player.getVelocity();
         if (!playerVelocity.isZero()) {
             flashlightRotation = playerVelocity.angle() - 90;
         }
 
         // Detect collisions with map
-        final Vector2 velocity = playerVelocity.cpy().scl(delta);
-        final Vector2 nextPosition = playerPosition.cpy().add(velocity);
+        final Vector2 velocity = playerVelocity.scl(delta);
+        final Vector2 nextPosition = player.getPosition().add(velocity);
         final boolean isCollision = isCollision(nextPosition);
 
         // Update player's position
         if (!isCollision) {
-            playerPosition = nextPosition;
+            player.setPosition(nextPosition);
         }
 
         // Center camera over player's position
+        final Vector2 playerPosition = player.getPosition();
         camera.position.set(playerPosition.x + 0.5f, playerPosition.y + 0.5f, 0f);
         viewport.apply(false);
 
@@ -205,7 +199,7 @@ public class GameScreen extends ScreenAdapter {
 
         // Render player
         batch.begin();
-        batch.draw(playerFrame, playerPosition.x, playerPosition.y, 1, 1);
+        batch.draw(player.getFrame(), playerPosition.x, playerPosition.y, 1, 1);
         batch.end();
 
         // Blend lighting FBO
@@ -237,15 +231,11 @@ public class GameScreen extends ScreenAdapter {
 
     private boolean isCollision(Vector2 nextPosition) {
         if (collisionLayer != null) {
-            final Rectangle boundingBox = new Rectangle(
-                    nextPosition.x / UNIT_SCALE + playerBoundingBox.x,
-                    nextPosition.y / UNIT_SCALE + playerBoundingBox.y,
-                    playerBoundingBox.width, playerBoundingBox.height);
             final MapObjects objects = collisionLayer.getObjects();
             for (final MapObject object : objects) {
                 if (object instanceof RectangleMapObject) {
                     final Rectangle rect = ((RectangleMapObject) object).getRectangle();
-                    if (boundingBox.overlaps(rect)) {
+                    if (player.isCollision(nextPosition.x / UNIT_SCALE, nextPosition.y / UNIT_SCALE, rect)) {
                         return true;
                     }
                 } else {
