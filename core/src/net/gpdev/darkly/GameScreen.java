@@ -7,7 +7,6 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -50,9 +49,10 @@ public class GameScreen extends ScreenAdapter {
     private OrthogonalTiledMapRenderer mapRenderer;
     private MapLayer collisionLayer;
     private TextureAtlas sprites;
+    private TextureAtlas lights;
     private FrameBuffer lightBuffer;
-    private Texture lightTexture;
-    private Texture flashlightTexture;
+    private TextureRegion lightTexture;
+    private TextureRegion flashlightTexture;
     private Sprite heroLight;
     private Sprite flashlight;
     private boolean isFlashlightOn = false;
@@ -77,8 +77,9 @@ public class GameScreen extends ScreenAdapter {
         sprites = new TextureAtlas(Gdx.files.internal("art/sprites.atlas"));
 
         // Load lightmaps
-        lightTexture = new Texture(Gdx.files.internal("art/light.png"));
-        flashlightTexture = new Texture(Gdx.files.internal("art/flashlight.png"));
+        lights = new TextureAtlas(Gdx.files.internal("art/lights.atlas"));
+        lightTexture = lights.findRegion("light");
+        flashlightTexture = lights.findRegion("flashlight");
         heroLight = new Sprite(lightTexture);
         flashlight = new Sprite(flashlightTexture);
 
@@ -146,6 +147,23 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void render(float delta) {
+
+        // Detect collisions with map
+        final Vector2 playerVelocity = player.getVelocity();
+        final Vector2 velocity = playerVelocity.scl(delta);
+        final Vector2 nextPosition = player.getPosition().add(velocity);
+        final boolean isCollision = isCollision(nextPosition);
+
+        // Update player's position
+        if (!isCollision) {
+            player.setPosition(nextPosition);
+        }
+
+        // Compute flashlight rotation
+        if (!playerVelocity.isZero()) {
+            flashlightRotation = playerVelocity.angle() - 90;
+        }
+
         // Prepare lighting FBO //
         lightBuffer.begin();
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
@@ -168,22 +186,6 @@ public class GameScreen extends ScreenAdapter {
         // Render to display //
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        // Compute flashlight rotation
-        final Vector2 playerVelocity = player.getVelocity();
-        if (!playerVelocity.isZero()) {
-            flashlightRotation = playerVelocity.angle() - 90;
-        }
-
-        // Detect collisions with map
-        final Vector2 velocity = playerVelocity.scl(delta);
-        final Vector2 nextPosition = player.getPosition().add(velocity);
-        final boolean isCollision = isCollision(nextPosition);
-
-        // Update player's position
-        if (!isCollision) {
-            player.setPosition(nextPosition);
-        }
 
         // Center camera over player's position
         final Vector2 playerPosition = player.getPosition();
@@ -259,17 +261,16 @@ public class GameScreen extends ScreenAdapter {
         fboTexturRegion.flip(false, true);
 
         // Pre-compute light sources positions
-        heroLight.setPosition((lightBuffer.getWidth() - lightTexture.getWidth()) / 2.0f,
-                (lightBuffer.getHeight() - lightTexture.getHeight()) / 2.0f);
-        flashlight.setPosition((lightBuffer.getWidth() - flashlightTexture.getWidth()) / 2.0f,
-                (lightBuffer.getHeight() - flashlightTexture.getHeight()) / 2.0f);
+        heroLight.setPosition((lightBuffer.getWidth() - lightTexture.getRegionWidth()) / 2.0f,
+                (lightBuffer.getHeight() - lightTexture.getRegionHeight()) / 2.0f);
+        flashlight.setPosition((lightBuffer.getWidth() - flashlightTexture.getRegionWidth()) / 2.0f,
+                (lightBuffer.getHeight() - flashlightTexture.getRegionHeight()) / 2.0f);
     }
 
     @Override
     public void dispose() {
         lightBuffer.dispose();
-        lightTexture.dispose();
-        flashlightTexture.dispose();
+        lights.dispose();
         sprites.dispose();
         map.dispose();
         batch.dispose();
