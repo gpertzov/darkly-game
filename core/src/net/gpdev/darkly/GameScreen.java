@@ -23,6 +23,10 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
+import java.util.Collection;
+
+import static net.gpdev.darkly.DarklyGame.FLASHLIGHT;
+
 public class GameScreen extends ScreenAdapter {
 
     private static final String TAG = GameScreen.class.getSimpleName();
@@ -35,12 +39,13 @@ public class GameScreen extends ScreenAdapter {
     private static final String COLLISION_LAYER = "collision";
     private static final String PLAYER_START = "PLAYER";
     private static final String PLAYER_SPRITE = "player";
+    private static final String SPOTLIGHT = "light";
     private static final float PLAYER_SPEED = 2;
     private static final float PLAYER_WIDTH = 14;
     private static final float PLAYER_HEIGHT = 16;
 
     private final DarklyGame game;
-    private GameEntity player;
+    private PlayerEntity player;
 
     private OrthographicCamera camera;
     private ExtendViewport viewport;
@@ -53,10 +58,6 @@ public class GameScreen extends ScreenAdapter {
     private FrameBuffer lightBuffer;
     private TextureRegion lightTexture;
     private TextureRegion flashlightTexture;
-    private Sprite heroLight;
-    private Sprite flashlight;
-    private boolean isFlashlightOn = false;
-    private float flashlightRotation = 0;
     private TextureRegion fboTexturRegion;
 
     public GameScreen(final DarklyGame game) {
@@ -78,21 +79,21 @@ public class GameScreen extends ScreenAdapter {
 
         // Load lightmaps
         lights = new TextureAtlas(Gdx.files.internal("art/lights.atlas"));
-        lightTexture = lights.findRegion("light");
-        flashlightTexture = lights.findRegion("flashlight");
-        heroLight = new Sprite(lightTexture);
-        flashlight = new Sprite(flashlightTexture);
+        lightTexture = lights.findRegion(SPOTLIGHT);
+        flashlightTexture = lights.findRegion(FLASHLIGHT);
+
+        // Init player entity
+        final Vector2 position = getMapPosition(PLAYER_START).scl(UNIT_SCALE);
+        final TextureRegion playerSprite = sprites.findRegion(PLAYER_SPRITE);
+        final Rectangle boundingBox = new Rectangle((TILE_SIZE - PLAYER_WIDTH) / 2.0f, (TILE_SIZE - PLAYER_HEIGHT) / 2.0f,
+                PLAYER_WIDTH, PLAYER_HEIGHT / 2.0f);
+        player = new PlayerEntity(new Sprite(playerSprite), position, PLAYER_SPEED, boundingBox);
+        player.addLight(SPOTLIGHT, new Light(new Sprite(lightTexture), true));
+        player.addLight(FLASHLIGHT, new Light(new Sprite(flashlightTexture), false));
 
         // Setup viewport
         camera = new OrthographicCamera();
         viewport = new ExtendViewport(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, camera);
-
-        // Init player entity
-        final Vector2 position = getMapPosition(PLAYER_START).scl(UNIT_SCALE);
-        final TextureRegion sprite = sprites.findRegion(PLAYER_SPRITE);
-        final Rectangle boundingBox = new Rectangle((TILE_SIZE - PLAYER_WIDTH) / 2.0f, (TILE_SIZE - PLAYER_HEIGHT) / 2.0f,
-                PLAYER_WIDTH, PLAYER_HEIGHT / 2.0f);
-        player = new GameEntity(sprite, position, PLAYER_SPEED, boundingBox);
 
         // Input processing // TODO - Extract to class
         Gdx.input.setInputProcessor(new InputAdapter() {
@@ -115,7 +116,7 @@ public class GameScreen extends ScreenAdapter {
                     return true;
                 }
                 if (keycode == Keys.SPACE) {
-                    isFlashlightOn = !isFlashlightOn;
+                    player.toggleFlashlight();
                 }
                 return super.keyDown(keycode);
             }
@@ -159,10 +160,7 @@ public class GameScreen extends ScreenAdapter {
             player.setPosition(nextPosition);
         }
 
-        // Compute flashlight rotation
-        if (!playerVelocity.isZero()) {
-            flashlightRotation = playerVelocity.angle() - 90;
-        }
+        player.update(delta);
 
         // Prepare lighting FBO //
         lightBuffer.begin();
@@ -173,11 +171,12 @@ public class GameScreen extends ScreenAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // Render light sources to FBO
+        final Collection<Light> playerLights = player.getLights();
         batch.begin();
-        heroLight.draw(batch);
-        if (isFlashlightOn) {
-            flashlight.setRotation(flashlightRotation);
-            flashlight.draw(batch);
+        for (Light light : playerLights) {
+            if (light.isEnabled()) {
+                light.getSprite().draw(batch);
+            }
         }
         batch.end();
 
@@ -201,7 +200,7 @@ public class GameScreen extends ScreenAdapter {
 
         // Render player
         batch.begin();
-        batch.draw(player.getFrame(), playerPosition.x, playerPosition.y, 1, 1);
+        batch.draw(player.getSprite(), playerPosition.x, playerPosition.y, 1, 1);
         batch.end();
 
         // Blend lighting FBO
@@ -260,11 +259,8 @@ public class GameScreen extends ScreenAdapter {
         fboTexturRegion = new TextureRegion(lightBuffer.getColorBufferTexture());
         fboTexturRegion.flip(false, true);
 
-        // Pre-compute light sources positions
-        heroLight.setPosition((lightBuffer.getWidth() - lightTexture.getRegionWidth()) / 2.0f,
-                (lightBuffer.getHeight() - lightTexture.getRegionHeight()) / 2.0f);
-        flashlight.setPosition((lightBuffer.getWidth() - flashlightTexture.getRegionWidth()) / 2.0f,
-                (lightBuffer.getHeight() - flashlightTexture.getRegionHeight()) / 2.0f);
+        // Notify entities
+        player.onLightBufferChanged(lightBuffer);
     }
 
     @Override

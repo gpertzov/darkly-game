@@ -9,6 +9,8 @@ public class DarklyGame extends Game {
     private SpriteBatch batch;
     private BitmapFont font;
 
+    public static final String FLASHLIGHT = "flashlight";
+
     @Override
     public void create() {
         batch = new SpriteBatch();
