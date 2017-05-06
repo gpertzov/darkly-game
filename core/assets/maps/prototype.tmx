@@ -32,7 +32,7 @@
  </layer>
  <layer name="structures" width="32" height="32">
   <data encoding="base64" compression="zlib">
-   eJzNlrlvE0EUh2d33XEmkIK7NpCKBASBgj+Bo0pizgoHlAIkEEcoQCJARZwgUXPUQLirQBzg/+BK4g0SFNDyjTQjvx2v7XW8tnnSp52dmX2/5xm/ebM1o9Qm2AadsKzR7TXPE55SJ73y+Cnap837NHNewGt4Ay/hVZNx73W+H/cq59w1fbPMLcIn+Axz8LFJ/TBQqmTQ7adoPRPkYDompnaajq2Z8bSt3XrtsLyv1IjfOf0JtAsd1P/fbJC8HoJhyMExOC5y3WOtfAgg04J1y8ecK6OiL4vmdtgBO43+FOP365xHX+EbfIcfNeZdxs8VuArXYAyuC9+H0DwMR+Co0X/M+JM6+is5y1bBaliT4rlmz1D3vUA8kyKmPjT7YTfscfQvMu/SMs/zM/jKw4jj8yH+HiX0eYt5485cG3+9vb2H7gQUUq4VNv4ke6tt0OSMtpyTM9psfbd1/WCmcWqZmzejzruu77fhjleu62mazZsHMTmjzdb35wnq+ga+3WjuZ9XYDFtadHfLxvj9GVN7e1usvxREtd0YtL6b58u1X/j+HUT1rUld29axaX2bJ2GTdxMPH36mUl/+dou1Aymufxe+umP0k9gf5i9CCRYMJfFux/4m9Kvv5vtgQKBtwOnb30CcZ8m5cyLvZuA9fIBZp1102nOOr/PoXjDatvbUu5tOoj0l9OdhARb1t+YZmj7Zr/uWHF830L5p9HdRg/ug32/sfhwa/1Lb6rn6+inXQP7Xh9AdhpzQl+MzqnJti8a//K2hIE4/VNG9+OJF9yEMolhz1zl0fNp+d061GOxerPDL+1Dr/jAvvrc+9bOL+LthHaz3qr+7/T3iP/SW9jsv/v5gbW0V3/8Ag97JMw==
+   eJzNlrlvE0EUh2d33XEmQIUUagOpSEAQKPgTOKok5qxwQClAAnGEAiQCVMQJEjVHDYS7CsQB/g+uJN4gQQEt30gz8tvx2ruO1zZP+rSzM7Pv9zzjN2/6ckpthW3QDcsb3X7zPOEpddKrjp+ifdq8zzLnBbyGN/ASXrUY917n+0mvds5d0zfP3DJ8gs+wAB9b1A8DpSoG3X6K1jNBAWZjYuqk6dhaGc/aOq3XCSv6So353dOfQrvURf3/zYbJ6xEYhQIcg+Mi1z3WyocAcm1Yt2LMuTIu+vJobocdsNPozzB+P+E8+grf4Dv8aDDvMn6uwFW4BhNwXfg+hOZhOAJHjf5jxp8k6K/lLFsH62FDhueaPUPd9xLxTIuYBtAchN2wx9G/yLxLqzzPz+CrCGOOz4f4e5TS5y3mTTpzbfxJe3sP3SkoZVwrbPxp9lbbsMkZbQUnZ7TZ+m7r+sFc8zQyN2/GnXdd32/DHa9a17M0mzcPYnJGm63vz1PU9T5zN0uiXXe3fIzfnzG1t7/N+itBVNuNQeu7eb5a+4Xv30FU35rUtW0dm9a3eRK2eDfx8OHnavXlb7dYO5Dh+vfgqzdGP439Yf4yVGDJUBHvduxvSr/6br4PhgTahpy+/U3EeZacOyfybg7ewweYd9plp73g+DqP7gWjbWtP0t10Gu0Zob8IS7CsvzXP0PTJft234vi6gfZNo7+LGjwAg35z9+PQ+JfaVs/V10+5BvK/PoLuKBSEvhyfU7VrWzb+5W8NBXH6oYruxRcvug9hEMWau86h49P2u3PqxWD3Yo1f3YdG94dF8b31qZ89xN8Lm2CzV//d7d8i/kNvab/z4u8P1jbW8f0PsGrJOg==
   </data>
  </layer>
  <objectgroup name="collision">
@@ -76,7 +76,7 @@
   <object id="72" x="210" y="401" width="79" height="12"/>
   <object id="73" x="129" y="401" width="63" height="12"/>
   <object id="74" x="120" y="305" width="4" height="105"/>
-  <object id="75" x="129" y="304" width="143" height="11"/>
+  <object id="75" x="126" y="304" width="149" height="11"/>
   <object id="76" x="277" y="305" width="4" height="73"/>
   <object id="78" x="448" y="256" width="64" height="48"/>
   <object id="80" x="224" y="160" width="64" height="48"/>

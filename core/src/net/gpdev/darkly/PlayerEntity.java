@@ -37,5 +37,9 @@ public class PlayerEntity extends GameEntity {
             flashlightRotation = velocity.angle() - 90;
         }
         lights.get(FLASHLIGHT).getSprite().setRotation(flashlightRotation);
+
+        // Update position
+        final Vector2 velocity = getVelocity().scl(delta);
+        setPosition(getPosition().add(velocity));
     }
 }

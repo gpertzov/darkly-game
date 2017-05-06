@@ -49,10 +49,16 @@ public class GameEntity {
 
     public void setPosition(final Vector2 position) {
         this.position = position;
+        boundingBox.x = position.x;
+        boundingBox.y = position.y;
     }
 
     public Vector2 getVelocity() {
         return velocity.cpy();
+    }
+
+    public Rectangle getBoundingBox() {
+        return new Rectangle(boundingBox);
     }
 
     public void addLight(final String name, final Light light) {
@@ -74,14 +80,6 @@ public class GameEntity {
 
     public void update(float delta) {
 
-    }
-
-    public boolean isCollision(final float x, final float y, final Rectangle target) {
-        final Rectangle rect = new Rectangle(
-                x + boundingBox.x, y + boundingBox.y,
-                boundingBox.width, boundingBox.height);
-
-        return rect.overlaps(target);
     }
 
     public void updateDirection(final float x, final float y) {

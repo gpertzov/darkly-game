@@ -12,12 +12,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
-import com.badlogic.gdx.maps.MapLayer;
-import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.MapObjects;
-import com.badlogic.gdx.maps.objects.RectangleMapObject;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -35,8 +29,6 @@ public class GameScreen extends ScreenAdapter {
     private static final int VIEWPORT_HEIGHT = 16;
     private static final int TILE_SIZE = 16;
     private static final float UNIT_SCALE = 1.0f / TILE_SIZE;
-    private static final String POSITIONS_LAYER = "positions";
-    private static final String COLLISION_LAYER = "collision";
     private static final String PLAYER_START = "PLAYER";
     private static final String PLAYER_SPRITE = "player";
     private static final String SPOTLIGHT = "light";
@@ -50,9 +42,8 @@ public class GameScreen extends ScreenAdapter {
     private OrthographicCamera camera;
     private ExtendViewport viewport;
     private SpriteBatch batch;
-    private TiledMap map;
+    private GameLevel level;
     private OrthogonalTiledMapRenderer mapRenderer;
-    private MapLayer collisionLayer;
     private TextureAtlas sprites;
     private TextureAtlas lights;
     private FrameBuffer lightBuffer;
@@ -69,10 +60,9 @@ public class GameScreen extends ScreenAdapter {
         // Init batch
         batch = new SpriteBatch();
 
-        // Load map
-        map = new TmxMapLoader().load("maps/prototype.tmx");
-        collisionLayer = map.getLayers().get(COLLISION_LAYER);
-        mapRenderer = new OrthogonalTiledMapRenderer(map, UNIT_SCALE, batch);
+        // Load level
+        level = new GameLevel("maps/prototype.tmx", UNIT_SCALE);
+        mapRenderer = new OrthogonalTiledMapRenderer(level.getMap(), level.getUnitScale(), batch);
 
         // Load sprites
         sprites = new TextureAtlas(Gdx.files.internal("art/sprites.atlas"));
@@ -83,7 +73,7 @@ public class GameScreen extends ScreenAdapter {
         flashlightTexture = lights.findRegion(FLASHLIGHT);
 
         // Init player entity
-        final Vector2 position = getMapPosition(PLAYER_START).scl(UNIT_SCALE);
+        final Vector2 position = level.getPosition(PLAYER_START);
         final TextureRegion playerSprite = sprites.findRegion(PLAYER_SPRITE);
         final Rectangle boundingBox = new Rectangle((TILE_SIZE - PLAYER_WIDTH) / 2.0f, (TILE_SIZE - PLAYER_HEIGHT) / 2.0f,
                 PLAYER_WIDTH, PLAYER_HEIGHT / 2.0f);
@@ -149,18 +139,16 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
 
-        // Detect collisions with map
-        final Vector2 playerVelocity = player.getVelocity();
-        final Vector2 velocity = playerVelocity.scl(delta);
-        final Vector2 nextPosition = player.getPosition().add(velocity);
-        final boolean isCollision = isCollision(nextPosition);
-
-        // Update player's position
-        if (!isCollision) {
-            player.setPosition(nextPosition);
-        }
-
+        // Update player entity
+        final Vector2 currentPlayerPosition = player.getPosition();
         player.update(delta);
+
+        // Detect player's collisions with level
+        final Rectangle boundingBox = player.getBoundingBox();
+        if (level.isCollision(boundingBox)) {
+            // Revert player's position update
+            player.setPosition(currentPlayerPosition);
+        }
 
         // Prepare lighting FBO //
         lightBuffer.begin();
@@ -213,40 +201,6 @@ public class GameScreen extends ScreenAdapter {
 
     }
 
-    private Vector2 getMapPosition(final String positionId) {
-        Vector2 position = new Vector2(0, 0);
-        MapLayer positionsLayer = map.getLayers().get(POSITIONS_LAYER);
-        if (positionsLayer != null) {
-            try {
-                final MapObjects objects = positionsLayer.getObjects();
-                final RectangleMapObject positionRect = (RectangleMapObject) objects.get(positionId);
-                positionRect.getRectangle().getPosition(position);
-            } catch (Exception e) {
-                Gdx.app.error(TAG, "Failed to obtain position " + positionId);
-            }
-        } else {
-            Gdx.app.debug(TAG, "Map has no positions layer");
-        }
-        return position;
-    }
-
-    private boolean isCollision(Vector2 nextPosition) {
-        if (collisionLayer != null) {
-            final MapObjects objects = collisionLayer.getObjects();
-            for (final MapObject object : objects) {
-                if (object instanceof RectangleMapObject) {
-                    final Rectangle rect = ((RectangleMapObject) object).getRectangle();
-                    if (player.isCollision(nextPosition.x / UNIT_SCALE, nextPosition.y / UNIT_SCALE, rect)) {
-                        return true;
-                    }
-                } else {
-                    Gdx.app.debug(TAG, "Unsupported collision object type");
-                }
-            }
-        }
-        return false;
-    }
-
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height);
@@ -268,7 +222,7 @@ public class GameScreen extends ScreenAdapter {
         lightBuffer.dispose();
         lights.dispose();
         sprites.dispose();
-        map.dispose();
+        level.dispose();
         batch.dispose();
     }
 }
