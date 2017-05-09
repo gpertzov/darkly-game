@@ -8,9 +8,11 @@ import static net.gpdev.darkly.DarklyGame.FLASHLIGHT;
 
 public class PlayerEntity extends GameEntity {
 
-    private float flashlightRotation = 0;
-    private int health = 100;
-    private int battery = 100;
+    private static final float BATTERY_DRAIN = 0.1f;
+
+    private float flashlightRotation = 0f;
+    private float health = 1f;
+    private float battery = 1f;
 
     public PlayerEntity(Sprite sprite, Vector2 position, float speed, Rectangle boundingBox) {
         super(sprite, position, speed, boundingBox);
@@ -20,11 +22,11 @@ public class PlayerEntity extends GameEntity {
         lights.get(FLASHLIGHT).toggle();
     }
 
-    public int getHealthLevel() {
+    public float getHealthLevel() {
         return health;
     }
 
-    public int getBatteryLevel() {
+    public float getBatteryLevel() {
         return battery;
     }
 
@@ -41,5 +43,17 @@ public class PlayerEntity extends GameEntity {
         // Update position
         final Vector2 velocity = getVelocity().scl(delta);
         setPosition(getPosition().add(velocity));
+
+        // Deplete battery
+        final Light flashlight = lights.get(FLASHLIGHT);
+        if (flashlight.isEnabled()) {
+            battery -= (BATTERY_DRAIN * delta);
+        }
+
+        // Turn off flashlight when battery is depleted
+        if (battery <= 0) {
+            battery = 0;
+            flashlight.setEnabled(false);
+        }
     }
 }
