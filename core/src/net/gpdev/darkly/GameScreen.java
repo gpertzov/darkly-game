@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -15,10 +16,17 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import java.util.Collection;
 
+import static com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import static net.gpdev.darkly.DarklyGame.FLASHLIGHT;
 
 public class GameScreen extends ScreenAdapter {
@@ -35,9 +43,20 @@ public class GameScreen extends ScreenAdapter {
     private static final float PLAYER_SPEED = 2;
     private static final float PLAYER_WIDTH = 14;
     private static final float PLAYER_HEIGHT = 16;
+    private static final float UI_PADDING = 4;
+    private static final String HEALTH_TEXT = "Health";
+    private static final String BATTERY_TEXT = "Battery";
+    private static final String BAR_ID = "bar";
+    private static final String FILLBAR_ID = "fillbar";
 
     private final DarklyGame game;
     private PlayerEntity player;
+
+    private Skin uiSkin;
+    private Stage uiStage;
+    private TextureAtlas uiAtlas;
+    private Image batteryLevel;
+    private Image healthLevel;
 
     private OrthographicCamera camera;
     private ExtendViewport viewport;
@@ -57,6 +76,9 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void show() {
+        // Setup UI
+        setupUI();
+
         // Init batch
         batch = new SpriteBatch();
 
@@ -136,9 +158,48 @@ public class GameScreen extends ScreenAdapter {
         });
     }
 
+    private void setupUI() {
+        uiSkin = new Skin(Gdx.files.internal("art/uiskin.json"));
+        uiStage = new Stage(new ScreenViewport());
+        uiAtlas = new TextureAtlas("art/ui.atlas");
+        final TextureRegion barRegion = uiAtlas.findRegion(BAR_ID);
+        final float widgetWidth = barRegion.getRegionWidth();
+        final float widgetHeight = barRegion.getRegionHeight();
+        final AtlasRegion fillbarRegion = uiAtlas.findRegion(FILLBAR_ID);
+
+        // Battery bar widget
+        final Image batteryBar = new Image(barRegion);
+        batteryLevel = new Image(fillbarRegion);
+        batteryLevel.setPosition(fillbarRegion.offsetX, fillbarRegion.offsetY);
+        final WidgetGroup batteryWidget = new WidgetGroup();
+        batteryWidget.addActor(batteryBar);
+        batteryWidget.addActor(batteryLevel);
+        batteryLevel.setColor(Color.BLUE);
+
+        // Health bar widget
+        final Image healthBar = new Image(barRegion);
+        healthLevel = new Image(fillbarRegion);
+        healthLevel.setPosition(fillbarRegion.offsetX, fillbarRegion.offsetY);
+        final WidgetGroup healthWidget = new WidgetGroup();
+        healthWidget.addActor(healthBar);
+        healthWidget.addActor(healthLevel);
+        healthLevel.setColor(Color.RED);
+
+        // Layout
+        final Table table = new Table(uiSkin);
+        table.defaults().grow().pad(UI_PADDING);
+        table.add(HEALTH_TEXT);
+        table.add(healthWidget).size(widgetWidth, widgetHeight);
+        table.row();
+        table.add(BATTERY_TEXT);
+        table.add(batteryWidget).size(widgetWidth, widgetHeight);
+        table.pack();
+
+        uiStage.addActor(table);
+    }
+
     @Override
     public void render(float delta) {
-
         // Update player entity
         final Vector2 currentPlayerPosition = player.getPosition();
         player.update(delta);
@@ -149,6 +210,11 @@ public class GameScreen extends ScreenAdapter {
             // Revert player's position update
             player.setPosition(currentPlayerPosition);
         }
+
+        // Update UI
+        batteryLevel.setWidth(batteryLevel.getPrefWidth() * player.getBatteryLevel());
+        healthLevel.setWidth(healthLevel.getPrefWidth() * player.getHealthLevel());
+        uiStage.act(delta);
 
         // Prepare lighting FBO //
         lightBuffer.begin();
@@ -199,11 +265,14 @@ public class GameScreen extends ScreenAdapter {
         batch.draw(fboTexturRegion, 0, 0);
         batch.end();
 
+        // Render UI
+        uiStage.draw();
     }
 
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height);
+        uiStage.getViewport().update(width, height, true);
 
         // Create lighting FBO
         if (lightBuffer != null) {
@@ -219,9 +288,12 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void dispose() {
+        uiStage.dispose();
+        uiSkin.dispose();
         lightBuffer.dispose();
         lights.dispose();
         sprites.dispose();
+        uiAtlas.dispose();
         level.dispose();
         batch.dispose();
     }

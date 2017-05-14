@@ -1,7 +1,7 @@
 sprites.png
 size: 32, 16
 format: RGBA8888
-filter: Linear,Linear
+filter: Nearest,Nearest
 repeat: none
 enemy
   rotate: false
