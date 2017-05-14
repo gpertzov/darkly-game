@@ -99,9 +99,8 @@ public class GameScreen extends ScreenAdapter {
         final TextureRegion playerSprite = sprites.findRegion(PLAYER_SPRITE);
         final Rectangle boundingBox = new Rectangle((TILE_SIZE - PLAYER_WIDTH) / 2.0f, (TILE_SIZE - PLAYER_HEIGHT) / 2.0f,
                 PLAYER_WIDTH, PLAYER_HEIGHT / 2.0f);
-        player = new PlayerEntity(new Sprite(playerSprite), position, PLAYER_SPEED, boundingBox);
+        player = new PlayerEntity(new Sprite(playerSprite), position, PLAYER_SPEED, boundingBox, new Sprite(flashlightTexture));
         player.addLight(SPOTLIGHT, new Light(new Sprite(lightTexture), true));
-        player.addLight(FLASHLIGHT, new Light(new Sprite(flashlightTexture), false));
 
         // Setup viewport
         camera = new OrthographicCamera();

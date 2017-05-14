@@ -13,13 +13,20 @@ public class PlayerEntity extends GameEntity {
     private float flashlightRotation = 0f;
     private float health = 1f;
     private float battery = 1f;
+    private Light flashlight;
 
-    public PlayerEntity(Sprite sprite, Vector2 position, float speed, Rectangle boundingBox) {
+    public PlayerEntity(Sprite sprite,
+                        Vector2 position,
+                        float speed,
+                        Rectangle boundingBox,
+                        Sprite flashlightSprite) {
         super(sprite, position, speed, boundingBox);
+        this.flashlight = new Light(flashlightSprite, false);
+        addLight(FLASHLIGHT, flashlight);
     }
 
     public void toggleFlashlight() {
-        lights.get(FLASHLIGHT).toggle();
+        flashlight.toggle();
     }
 
     public float getHealthLevel() {
@@ -38,14 +45,13 @@ public class PlayerEntity extends GameEntity {
         if (!velocity.isZero()) {
             flashlightRotation = velocity.angle() - 90;
         }
-        lights.get(FLASHLIGHT).getSprite().setRotation(flashlightRotation);
+        flashlight.getSprite().setRotation(flashlightRotation);
 
         // Update position
         final Vector2 velocity = getVelocity().scl(delta);
         setPosition(getPosition().add(velocity));
 
         // Deplete battery
-        final Light flashlight = lights.get(FLASHLIGHT);
         if (flashlight.isEnabled()) {
             battery -= (BATTERY_DRAIN * delta);
         }
