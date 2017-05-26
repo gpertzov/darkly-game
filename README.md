@@ -10,6 +10,7 @@ Implemented so far:
 * Player collision detection with map objects
 * Lightmaps using Framebuffer Object (FBO)
 * Rudimentary Scene2d GUI (status bars)
+* Map triggered events (power-ups, traps)
 
 ![Screens](https://raw.githubusercontent.com/gpertzov/darkly-game/master/docs/img/darkly005.png)
 ![Screens](https://raw.githubusercontent.com/gpertzov/darkly-game/master/docs/img/darkly001.png)
