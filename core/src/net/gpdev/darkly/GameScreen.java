@@ -18,9 +18,11 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
@@ -49,7 +51,13 @@ public class GameScreen extends ScreenAdapter {
     private static final String BAR_ID = "bar";
     private static final String FILLBAR_ID = "fillbar";
 
+    private enum State {
+        PLAYING,
+        GAME_OVER
+    }
+
     private final DarklyGame game;
+    private State state;
     private PlayerEntity player;
 
     private Skin uiSkin;
@@ -57,6 +65,7 @@ public class GameScreen extends ScreenAdapter {
     private TextureAtlas uiAtlas;
     private Image batteryLevel;
     private Image healthLevel;
+    private Label messageText;
 
     private OrthographicCamera camera;
     private ExtendViewport viewport;
@@ -100,11 +109,15 @@ public class GameScreen extends ScreenAdapter {
         final Rectangle boundingBox = new Rectangle((TILE_SIZE - PLAYER_WIDTH) / 2.0f, (TILE_SIZE - PLAYER_HEIGHT) / 2.0f,
                 PLAYER_WIDTH, PLAYER_HEIGHT / 2.0f);
         player = new PlayerEntity(new Sprite(playerSprite), position, PLAYER_SPEED, boundingBox, new Sprite(flashlightTexture));
-        player.addLight(SPOTLIGHT, new Light(new Sprite(lightTexture), true));
+        final Sprite heroLight = new Sprite(lightTexture);
+        heroLight.setColor(Color.LIGHT_GRAY);
+        player.addLight(SPOTLIGHT, new Light(heroLight, true));
 
         // Setup viewport
         camera = new OrthographicCamera();
         viewport = new ExtendViewport(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, camera);
+
+        state = State.PLAYING;
 
         // Input processing // TODO - Extract to class
         Gdx.input.setInputProcessor(new InputAdapter() {
@@ -194,20 +207,28 @@ public class GameScreen extends ScreenAdapter {
         table.add(batteryWidget).size(widgetWidth, widgetHeight);
         table.pack();
 
+        messageText = new Label("", uiSkin);
+
+        uiStage.addActor(messageText);
         uiStage.addActor(table);
     }
 
     @Override
     public void render(float delta) {
-        // Update player entity
-        final Vector2 currentPlayerPosition = player.getPosition();
-        player.update(delta);
+        switch (state) {
+            case PLAYING: {
+                update(delta);
+            }
+            break;
+            case GAME_OVER: {
 
-        // Detect player's collisions with level
-        final Rectangle boundingBox = player.getBoundingBox();
-        if (level.isCollision(boundingBox)) {
-            // Revert player's position update
-            player.setPosition(currentPlayerPosition);
+
+            }
+            break;
+            default: {
+
+            }
+            break;
         }
 
         // Update UI
@@ -220,7 +241,7 @@ public class GameScreen extends ScreenAdapter {
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
 
         // Ambient light color
-        Gdx.gl.glClearColor(0.1f, 0.1f, 0.2f, 1);
+        Gdx.gl.glClearColor(0.01f, 0.01f, 0.02f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // Render light sources to FBO
@@ -266,6 +287,51 @@ public class GameScreen extends ScreenAdapter {
 
         // Render UI
         uiStage.draw();
+    }
+
+    private void update(float delta) {
+        // Update player entity
+        final Vector2 currentPlayerPosition = player.getPosition();
+        player.update(delta);
+
+        // Detect player's collisions with level
+        final Rectangle boundingBox = player.getBoundingBox();
+        if (level.isCollision(boundingBox)) {
+            // Revert player's position update
+            player.setPosition(currentPlayerPosition);
+        }
+
+        // Check level triggered events
+        final Vector2 playerCenter = player.getPosition().add(0.5f, 0.5f);
+        final TriggeredEvent event = level.consumeTrigger((int) playerCenter.x, (int) playerCenter.y);
+        if (!consumeGameEvent(event)) {
+            player.reactTo(event);
+        }
+
+        if (player.getHealthLevel() <= 0) {
+            endGame("Too bad, Try again");
+        }
+    }
+
+    private boolean consumeGameEvent(final TriggeredEvent event) {
+        if (event == null) {
+            return true;
+        }
+
+        if (event.getType() == TriggeredEvent.Type.WIN) {
+            endGame("You Win!");
+            return true;
+        }
+
+        return false;
+    }
+
+    private void endGame(final String message) {
+        messageText.setText(message);
+        messageText.setFontScale(2.0f);
+        messageText.setPosition((uiStage.getWidth() - messageText.getPrefWidth()) / 2.0f,
+                (uiStage.getHeight() - messageText.getPrefHeight()) / 2.0f, Align.center);
+        state = State.GAME_OVER;
     }
 
     @Override

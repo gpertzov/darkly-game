@@ -82,6 +82,10 @@ public class GameEntity {
 
     }
 
+    public void reactTo(TriggeredEvent event) {
+
+    }
+
     public void updateDirection(final float x, final float y) {
         velocity.x += x * speed;
         velocity.y += y * speed;

@@ -14,6 +14,35 @@
  </tileset>
  <tileset firstgid="1322" name="AngryMeteor-expansion-sprites14c" tilewidth="16" tileheight="16" spacing="2" margin="1" tilecount="300" columns="15">
   <image source="../art/AngryMeteor-expansion-sprites14c.png" trans="ffffff" width="270" height="360"/>
+  <tile id="6">
+   <properties>
+    <property name="amount" type="int" value="35"/>
+    <property name="event" value="HEAL"/>
+   </properties>
+  </tile>
+  <tile id="43">
+   <properties>
+    <property name="event" value="WIN"/>
+   </properties>
+  </tile>
+  <tile id="63">
+   <properties>
+    <property name="amount" type="int" value="15"/>
+    <property name="event" value="HARM"/>
+   </properties>
+  </tile>
+  <tile id="67">
+   <properties>
+    <property name="amount" type="int" value="50"/>
+    <property name="event" value="CHARGE"/>
+   </properties>
+  </tile>
+  <tile id="176">
+   <properties>
+    <property name="amount" type="int" value="70"/>
+    <property name="event" value="HARM"/>
+   </properties>
+  </tile>
  </tileset>
  <layer name="background" width="32" height="32">
   <data encoding="base64" compression="zlib">
@@ -150,12 +179,11 @@
  </objectgroup>
  <layer name="triggers" width="32" height="32">
   <data encoding="base64" compression="zlib">
-   eJxjYBh4EMo60C5ABQZA9+SyItjDHeSOAD/iArdYMfFAu2ck2Y8t/EdyeiQGDMbwGYxuGgUjE4ykupvWAFsYZrJCMLUAOeZR2w2jADugdbkOa2vnItX7QzVuh1odSK57c4loow21sBipAADN6xX2
+   eJxjYBh4EMo60C5ABQZA9+SyItjDHeSOAD/iArdYMfFAu2ck2Y8t/EdyeiQGDMbwGYxuGgUjE4ykupvWABSGmWjhmIlFjBJAjnnUdsNQAAPhX1qX68h5FGbXUI3boVYHUuJeQnqHWliMVAAASR8VfA==
   </data>
  </layer>
  <objectgroup name="positions">
   <object id="11" name="PLAYER" x="384" y="496" width="16" height="16"/>
   <object id="12" name="ENEMY" x="272" y="0" width="16" height="16"/>
-  <object id="13" name="GOAL" x="16" y="16" width="16" height="16"/>
  </objectgroup>
 </map>

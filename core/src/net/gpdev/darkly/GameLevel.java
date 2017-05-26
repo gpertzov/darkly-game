@@ -4,8 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
+import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -16,11 +18,13 @@ public class GameLevel implements Disposable {
 
     private static final String POSITIONS_LAYER = "positions";
     private static final String COLLISION_LAYER = "collision";
+    private static final String TRIGGERS_LAYER = "triggers";
 
     private final TiledMap map;
     private final float unitScale;
     private MapLayer positionsLayer;
     private MapLayer collisionLayer;
+    private TiledMapTileLayer triggersLayer;
 
     public GameLevel(final String path, final float unitScale) {
         this.unitScale = unitScale;
@@ -28,6 +32,7 @@ public class GameLevel implements Disposable {
         map = new TmxMapLoader().load(path);
         positionsLayer = map.getLayers().get(POSITIONS_LAYER);
         collisionLayer = map.getLayers().get(COLLISION_LAYER);
+        triggersLayer = (TiledMapTileLayer) map.getLayers().get(TRIGGERS_LAYER);
     }
 
     public float getUnitScale() {
@@ -72,6 +77,16 @@ public class GameLevel implements Disposable {
             }
         }
         return false;
+    }
+
+    public TriggeredEvent consumeTrigger(final int x, final int y) {
+        final TiledMapTileLayer.Cell cell = triggersLayer.getCell(x, y);
+        if (cell != null) {
+            final MapProperties tileProperties = cell.getTile().getProperties();
+            triggersLayer.setCell(x, y, null);
+            return TriggeredEvent.fromProperties(tileProperties);
+        }
+        return null;
     }
 
     @Override
