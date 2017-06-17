@@ -26,6 +26,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import static com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
@@ -45,6 +46,9 @@ public class GameScreen extends ScreenAdapter {
     private static final float PLAYER_SPEED = 2;
     private static final float PLAYER_WIDTH = 14;
     private static final float PLAYER_HEIGHT = 16;
+    private static final String ENEMY_START = "ENEMY";
+    private static final String ENEMY_SPRITE = "enemy";
+    private static final float ENEMY_SPEED = 8;
     private static final float UI_PADDING = 4;
     private static final String HEALTH_TEXT = "Health";
     private static final String BATTERY_TEXT = "Battery";
@@ -59,6 +63,7 @@ public class GameScreen extends ScreenAdapter {
     private final DarklyGame game;
     private State state;
     private PlayerEntity player;
+    private EnemyEntity enemy;
 
     private Skin uiSkin;
     private Stage uiStage;
@@ -75,8 +80,6 @@ public class GameScreen extends ScreenAdapter {
     private TextureAtlas sprites;
     private TextureAtlas lights;
     private FrameBuffer lightBuffer;
-    private TextureRegion lightTexture;
-    private TextureRegion flashlightTexture;
     private TextureRegion fboTexturRegion;
 
     public GameScreen(final DarklyGame game) {
@@ -100,10 +103,10 @@ public class GameScreen extends ScreenAdapter {
 
         // Load lightmaps
         lights = new TextureAtlas(Gdx.files.internal("art/lights.atlas"));
-        lightTexture = lights.findRegion(SPOTLIGHT);
-        flashlightTexture = lights.findRegion(FLASHLIGHT);
+        final TextureRegion lightTexture = lights.findRegion(SPOTLIGHT);
+        final TextureRegion flashlightTexture = lights.findRegion(FLASHLIGHT);
 
-        // Init player entity
+        // Setup player entity
         final Vector2 position = level.getPosition(PLAYER_START);
         final TextureRegion playerSprite = sprites.findRegion(PLAYER_SPRITE);
         final Rectangle boundingBox = new Rectangle((TILE_SIZE - PLAYER_WIDTH) / 2.0f, (TILE_SIZE - PLAYER_HEIGHT) / 2.0f,
@@ -112,6 +115,15 @@ public class GameScreen extends ScreenAdapter {
         final Sprite heroLight = new Sprite(lightTexture);
         heroLight.setColor(Color.LIGHT_GRAY);
         player.addLight(SPOTLIGHT, new Light(heroLight, true));
+
+        // Setup enemy entity
+        final Vector2 enemyPosition = level.getPosition(ENEMY_START);
+        final TextureRegion enemyTexture = sprites.findRegion(ENEMY_SPRITE);
+        final Sprite enemySprite = new Sprite(enemyTexture);
+        enemy = new EnemyEntity(enemySprite, enemyPosition, ENEMY_SPEED, new Rectangle());
+        final Sprite enemyLight = new Sprite(lightTexture);
+        enemyLight.setScale(3);
+        enemy.addLight(SPOTLIGHT, new Light(enemyLight, true));
 
         // Setup viewport
         camera = new OrthographicCamera();
@@ -236,7 +248,38 @@ public class GameScreen extends ScreenAdapter {
         healthLevel.setWidth(healthLevel.getPrefWidth() * player.getHealthLevel());
         uiStage.act(delta);
 
-        // Prepare lighting FBO //
+        // Render to display //
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        // Reset blending function
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+        // Center camera over player's position
+        final Vector2 playerPosition = player.getPosition();
+        camera.position.set(playerPosition.x + 0.5f, playerPosition.y + 0.5f, 0f);
+        viewport.apply(false);
+
+        final Vector2 enemyPosition = enemy.getPosition();
+
+        // Project entity lights to screen coordinates
+        player.projectLights(camera);
+        enemy.projectLights(camera);
+
+        // Render map
+        mapRenderer.setView(camera);
+        mapRenderer.render();
+
+        // Render entities
+        batch.begin();
+        batch.draw(player.getSprite(), playerPosition.x, playerPosition.y, 1, 1);
+        batch.draw(enemy.getSprite(), enemyPosition.x, enemyPosition.y, 1, 1);
+        batch.end();
+
+        camera.setToOrtho(false);
+        batch.setProjectionMatrix(camera.combined);
+
+        // Render to lighting FBO //
         lightBuffer.begin();
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
 
@@ -245,41 +288,20 @@ public class GameScreen extends ScreenAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // Render light sources to FBO
-        final Collection<Light> playerLights = player.getLights();
+        final Collection<Light> entityLights = new ArrayList<Light>();
+        entityLights.addAll(player.getLights());
+        entityLights.addAll(enemy.getLights());
         batch.begin();
-        for (Light light : playerLights) {
+        for (Light light : entityLights) {
             if (light.isEnabled()) {
-                light.getSprite().draw(batch);
+                final Sprite sprite = light.getSprite();
+                sprite.draw(batch);
             }
         }
         batch.end();
-
         lightBuffer.end();
 
-        // Render to display //
-        Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        // Center camera over player's position
-        final Vector2 playerPosition = player.getPosition();
-        camera.position.set(playerPosition.x + 0.5f, playerPosition.y + 0.5f, 0f);
-        viewport.apply(false);
-
-        // Reset blending function
-        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-
-        // Render map
-        mapRenderer.setView(camera);
-        mapRenderer.render();
-
-        // Render player
-        batch.begin();
-        batch.draw(player.getSprite(), playerPosition.x, playerPosition.y, 1, 1);
-        batch.end();
-
         // Blend lighting FBO
-        camera.setToOrtho(false);
-        batch.setProjectionMatrix(camera.combined);
         batch.setBlendFunction(GL20.GL_DST_COLOR, GL20.GL_ZERO);
         batch.begin();
         batch.draw(fboTexturRegion, 0, 0);
@@ -311,6 +333,9 @@ public class GameScreen extends ScreenAdapter {
         if (player.getHealthLevel() <= 0) {
             endGame("Too bad, Try again");
         }
+
+        // Update enemy entity
+        enemy.update(delta);
     }
 
     private boolean consumeGameEvent(final TriggeredEvent event) {
@@ -346,9 +371,6 @@ public class GameScreen extends ScreenAdapter {
         lightBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
         fboTexturRegion = new TextureRegion(lightBuffer.getColorBufferTexture());
         fboTexturRegion.flip(false, true);
-
-        // Notify entities
-        player.onLightBufferChanged(lightBuffer);
     }
 
     @Override

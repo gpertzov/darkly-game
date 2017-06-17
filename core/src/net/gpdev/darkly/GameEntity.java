@@ -1,10 +1,11 @@
 package net.gpdev.darkly;
 
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -69,15 +70,6 @@ public class GameEntity {
         return Collections.unmodifiableCollection(lights.values());
     }
 
-    public void onLightBufferChanged(final FrameBuffer fbo) {
-        // Pre-compute lightmaps positions
-        for (final Light light : lights.values()) {
-            final Sprite sprite = light.getSprite();
-            sprite.setPosition((fbo.getWidth() - sprite.getWidth()) / 2.0f,
-                    (fbo.getHeight() - sprite.getHeight()) / 2.0f);
-        }
-    }
-
     public void update(float delta) {
 
     }
@@ -89,5 +81,15 @@ public class GameEntity {
     public void updateDirection(final float x, final float y) {
         velocity.x += x * speed;
         velocity.y += y * speed;
+    }
+
+    public void projectLights(final Camera camera) {
+        // Project lights to screen coordinates
+        final Vector3 screenCoords = camera.project(new Vector3(position.x + 0.5f, position.y + 0.5f, 0));
+        for (final Light light : lights.values()) {
+            final Sprite sprite = light.getSprite();
+            sprite.setPosition(screenCoords.x - sprite.getWidth() / 2.0f,
+                    screenCoords.y - sprite.getHeight() / 2.0f);
+        }
     }
 }
