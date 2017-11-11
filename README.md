@@ -11,6 +11,7 @@ Implemented so far:
 * Lightmaps using Framebuffer Object (FBO)
 * Rudimentary Scene2d GUI (status bars)
 * Map triggered events (power-ups, hazzards)
+* Enemy drone
 
 ![Screens](https://raw.githubusercontent.com/gpertzov/darkly-game/master/docs/img/darkly005.png)
 ![Screens](https://raw.githubusercontent.com/gpertzov/darkly-game/master/docs/img/darkly001.png)
