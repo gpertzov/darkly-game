@@ -48,12 +48,13 @@ public class GameScreen extends ScreenAdapter {
     private static final float PLAYER_HEIGHT = 16;
     private static final String ENEMY_START = "ENEMY";
     private static final String ENEMY_SPRITE = "enemy";
-    private static final float ENEMY_SPEED = 8;
+    private static final float ENEMY_SPEED = 3;
     private static final float UI_PADDING = 4;
     private static final String HEALTH_TEXT = "Health";
     private static final String BATTERY_TEXT = "Battery";
     private static final String BAR_ID = "bar";
     private static final String FILLBAR_ID = "fillbar";
+    private static final Color AMBIENT_LIGHT = new Color(0.01f, 0.01f, 0.02f, 1.0f);
 
     private enum State {
         PLAYING,
@@ -120,10 +121,11 @@ public class GameScreen extends ScreenAdapter {
         final Vector2 enemyPosition = level.getPosition(ENEMY_START);
         final TextureRegion enemyTexture = sprites.findRegion(ENEMY_SPRITE);
         final Sprite enemySprite = new Sprite(enemyTexture);
-        enemy = new EnemyEntity(enemySprite, enemyPosition, ENEMY_SPEED, new Rectangle());
+        enemy = new EnemyEntity(enemySprite, enemyPosition, ENEMY_SPEED, new Rectangle(0, 0, 1, 1));
         final Sprite enemyLight = new Sprite(lightTexture);
         enemyLight.setScale(3);
         enemy.addLight(SPOTLIGHT, new Light(enemyLight, true));
+        enemy.setLevel(level);
 
         // Setup viewport
         camera = new OrthographicCamera();
@@ -136,19 +138,19 @@ public class GameScreen extends ScreenAdapter {
             @Override
             public boolean keyDown(int keycode) {
                 if (keycode == Keys.LEFT) {
-                    player.updateDirection(-1f, 0);
+                    player.updateDirection(new Vector2(-1f, 0));
                     return true;
                 }
                 if (keycode == Keys.RIGHT) {
-                    player.updateDirection(1f, 0);
+                    player.updateDirection(new Vector2(1f, 0));
                     return true;
                 }
                 if (keycode == Keys.UP) {
-                    player.updateDirection(0, 1f);
+                    player.updateDirection(new Vector2(0, 1f));
                     return true;
                 }
                 if (keycode == Keys.DOWN) {
-                    player.updateDirection(0, -1f);
+                    player.updateDirection(new Vector2(0, -1f));
                     return true;
                 }
                 if (keycode == Keys.SPACE) {
@@ -164,18 +166,18 @@ public class GameScreen extends ScreenAdapter {
                 }
 
                 if (keycode == Keys.LEFT) {
-                    player.updateDirection(1f, 0);
+                    player.updateDirection(new Vector2(1f, 0));
                     return true;
                 }
                 if (keycode == Keys.RIGHT) {
-                    player.updateDirection(-1f, 0);
+                    player.updateDirection(new Vector2(-1f, 0));
                     return true;
                 }
                 if (keycode == Keys.UP) {
-                    player.updateDirection(0, -1f);
+                    player.updateDirection(new Vector2(0, -1f));
                 }
                 if (keycode == Keys.DOWN) {
-                    player.updateDirection(0, 1f);
+                    player.updateDirection(new Vector2(0, 1f));
                 }
                 return super.keyUp(keycode);
             }
@@ -260,8 +262,6 @@ public class GameScreen extends ScreenAdapter {
         camera.position.set(playerPosition.x + 0.5f, playerPosition.y + 0.5f, 0f);
         viewport.apply(false);
 
-        final Vector2 enemyPosition = enemy.getPosition();
-
         // Project entity lights to screen coordinates
         player.projectLights(camera);
         enemy.projectLights(camera);
@@ -271,6 +271,7 @@ public class GameScreen extends ScreenAdapter {
         mapRenderer.render();
 
         // Render entities
+        final Vector2 enemyPosition = enemy.getPosition();
         batch.begin();
         batch.draw(player.getSprite(), playerPosition.x, playerPosition.y, 1, 1);
         batch.draw(enemy.getSprite(), enemyPosition.x, enemyPosition.y, 1, 1);
@@ -284,15 +285,15 @@ public class GameScreen extends ScreenAdapter {
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
 
         // Ambient light color
-        Gdx.gl.glClearColor(0.01f, 0.01f, 0.02f, 1);
+        Gdx.gl.glClearColor(AMBIENT_LIGHT.r, AMBIENT_LIGHT.g, AMBIENT_LIGHT.b, AMBIENT_LIGHT.a);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // Render light sources to FBO
-        final Collection<Light> entityLights = new ArrayList<Light>();
+        final Collection<Light> entityLights = new ArrayList<>();
         entityLights.addAll(player.getLights());
         entityLights.addAll(enemy.getLights());
         batch.begin();
-        for (Light light : entityLights) {
+        for (final Light light : entityLights) {
             if (light.isEnabled()) {
                 final Sprite sprite = light.getSprite();
                 sprite.draw(batch);

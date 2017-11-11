@@ -17,13 +17,16 @@ public class GameEntity {
     // TODO - Extract into separate components //
     // Graphics
     private Sprite sprite;
-    protected Map<String, Light> lights;
+    private Map<String, Light> lights;
 
     // Physics
     private final float speed;
     private final Rectangle boundingBox;
     private Vector2 position;
-    protected Vector2 velocity;
+    private Vector2 velocity;
+
+    // World representation
+    protected GameLevel level;
 
 
     public GameEntity(final Sprite sprite,
@@ -36,7 +39,7 @@ public class GameEntity {
         this.boundingBox = boundingBox;
 
         velocity = new Vector2(0, 0);
-        lights = new HashMap<String, Light>();
+        lights = new HashMap<>();
 
     }
 
@@ -52,6 +55,10 @@ public class GameEntity {
         this.position = position;
         boundingBox.x = position.x;
         boundingBox.y = position.y;
+    }
+
+    public void setLevel(final GameLevel level) {
+        this.level = level;
     }
 
     public Vector2 getVelocity() {
@@ -78,9 +85,16 @@ public class GameEntity {
 
     }
 
-    public void updateDirection(final float x, final float y) {
-        velocity.x += x * speed;
-        velocity.y += y * speed;
+    public void updateDirection(final Vector2 direction) {
+        final Vector2 normDirection = direction.cpy().nor();
+        velocity.x += normDirection.x * speed;
+        velocity.y += normDirection.y * speed;
+    }
+
+    public void setDirection(final Vector2 direction) {
+        final Vector2 normDirection = direction.cpy().nor();
+        velocity.x = normDirection.x * speed;
+        velocity.y = normDirection.y * speed;
     }
 
     public void projectLights(final Camera camera) {

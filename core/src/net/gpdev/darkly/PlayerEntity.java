@@ -16,11 +16,11 @@ public class PlayerEntity extends GameEntity {
     private float battery = 1f;
     private Light flashlight;
 
-    public PlayerEntity(Sprite sprite,
-                        Vector2 position,
-                        float speed,
-                        Rectangle boundingBox,
-                        Sprite flashlightSprite) {
+    public PlayerEntity(final Sprite sprite,
+                        final Vector2 position,
+                        final float speed,
+                        final Rectangle boundingBox,
+                        final Sprite flashlightSprite) {
         super(sprite, position, speed, boundingBox);
         this.flashlight = new Light(flashlightSprite, false);
         addLight(FLASHLIGHT, flashlight);
@@ -39,12 +39,13 @@ public class PlayerEntity extends GameEntity {
     }
 
     @Override
-    public void update(float delta) {
+    public void update(final float delta) {
         super.update(delta);
 
         // Compute flashlight rotation
-        if (!velocity.isZero()) {
-            flashlightRotation = velocity.angle() - 90;
+        final Vector2 curVelocity = getVelocity();
+        if (!curVelocity.isZero()) {
+            flashlightRotation = curVelocity.angle() - 90;
         }
         flashlight.getSprite().setRotation(flashlightRotation);
 
@@ -65,7 +66,7 @@ public class PlayerEntity extends GameEntity {
     }
 
     @Override
-    public void reactTo(TriggeredEvent event) {
+    public void reactTo(final TriggeredEvent event) {
         super.reactTo(event);
 
         final float amount = event.getAmount() / 100f;
