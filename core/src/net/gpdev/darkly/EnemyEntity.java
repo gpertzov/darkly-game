@@ -5,9 +5,12 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
+import java.util.List;
+
 public class EnemyEntity extends GameEntity {
 
     private static final int DISTANCE_RANGE = 16;
+    private static final int TARGET_RANGE = 3;
     private float distanceToMove = 0;
 
     public EnemyEntity(final Sprite sprite,
@@ -21,15 +24,26 @@ public class EnemyEntity extends GameEntity {
     public void update(final float delta) {
         super.update(delta);
 
-        // If not moving - wander randomly
-        if (distanceToMove <= 0 || getVelocity().isZero()) {
-            // Pick a random direction
-            final float xDir = MathUtils.random(-1, 1);
-            final float yDir = MathUtils.random(-1, 1);
-            setDirection(new Vector2(xDir, yDir));
+        final List<GameEntity> targets = level.getEntitiesInRange(this, getPosition(), TARGET_RANGE);
 
-            // Pick a random distance
-            distanceToMove = MathUtils.random(DISTANCE_RANGE);
+        if (!targets.isEmpty()) {
+            // DESTROY //
+            final GameEntity target = targets.get(0);
+            final Vector2 dirToTarget = target.getPosition().sub(getPosition());
+            setDirection(dirToTarget);
+        } else {
+            // SEEK //
+
+            // Wander randomly
+            if (distanceToMove <= 0 || getVelocity().isZero()) {
+                // Pick a random direction
+                final float xDir = MathUtils.random(-1, 1);
+                final float yDir = MathUtils.random(-1, 1);
+                setDirection(new Vector2(xDir, yDir));
+
+                // Pick a random distance
+                distanceToMove = MathUtils.random(DISTANCE_RANGE);
+            }
         }
 
         // Update position

@@ -127,6 +127,10 @@ public class GameScreen extends ScreenAdapter {
         enemy.addLight(SPOTLIGHT, new Light(enemyLight, true));
         enemy.setLevel(level);
 
+        // Add entities to level
+        level.addEntity(player);
+        level.addEntity(enemy);
+
         // Setup viewport
         camera = new OrthographicCamera();
         viewport = new ExtendViewport(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, camera);

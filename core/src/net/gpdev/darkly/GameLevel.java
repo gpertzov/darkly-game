@@ -13,6 +13,10 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class GameLevel implements Disposable {
     private static final String TAG = GameLevel.class.getSimpleName();
 
@@ -28,6 +32,8 @@ public class GameLevel implements Disposable {
     private final int mapWidth;
     private final int mapHeight;
 
+    private final List<GameEntity> entities;
+
     public GameLevel(final String path, final float unitScale) {
         this.unitScale = unitScale;
 
@@ -42,6 +48,8 @@ public class GameLevel implements Disposable {
         positionsLayer = map.getLayers().get(POSITIONS_LAYER);
         collisionLayer = map.getLayers().get(COLLISION_LAYER);
         triggersLayer = (TiledMapTileLayer) map.getLayers().get(TRIGGERS_LAYER);
+
+        entities = new ArrayList<>();
     }
 
     public float getUnitScale() {
@@ -66,6 +74,17 @@ public class GameLevel implements Disposable {
             Gdx.app.error(TAG, "Map has no positions layer");
         }
         return position.scl(unitScale);
+    }
+
+    public void addEntity(final GameEntity entity) {
+        entities.add(entity);
+    }
+
+    public List<GameEntity> getEntitiesInRange(final GameEntity self, final Vector2 position, final float range) {
+        final float range2 = range * range;
+        return entities.stream()
+                .filter(entity -> entity != self && entity.getPosition().dst2(position) <= range2)
+                .collect(Collectors.toList());
     }
 
     public boolean isOutOfBounds(final Rectangle rect) {
