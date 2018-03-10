@@ -11,6 +11,7 @@ public class EnemyEntity extends GameEntity {
 
     private static final int DISTANCE_RANGE = 16;
     private static final int TARGET_RANGE = 3;
+    private static final float INTERCEPT_RADIUS_2 = 0.5f;
     private float distanceToMove = 0;
 
     public EnemyEntity(final Sprite sprite,
@@ -26,11 +27,18 @@ public class EnemyEntity extends GameEntity {
 
         final List<GameEntity> targets = level.getEntitiesInRange(this, getPosition(), TARGET_RANGE);
 
+        // Target in range
         if (!targets.isEmpty()) {
-            // DESTROY //
+            // INTERCEPT //
             final GameEntity target = targets.get(0);
             final Vector2 dirToTarget = target.getPosition().sub(getPosition());
-            setDirection(dirToTarget);
+            if (dirToTarget.len2() > INTERCEPT_RADIUS_2) {
+                setDirection(dirToTarget);
+            } else {
+                setDirection(Vector2.Zero);
+            }
+
+            // ATTACK //
         } else {
             // SEEK //
 
