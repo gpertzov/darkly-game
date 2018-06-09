@@ -12,6 +12,7 @@ Implemented so far:
 * Rudimentary Scene2d GUI (status bars)
 * Map triggered events (power-ups, hazzards)
 * Enemy drone
+* Enemy attack animation
 
 ![Screens](https://raw.githubusercontent.com/gpertzov/darkly-game/master/docs/img/darkly003.png)
 ![Screens](https://raw.githubusercontent.com/gpertzov/darkly-game/master/docs/img/darkly005.png)
