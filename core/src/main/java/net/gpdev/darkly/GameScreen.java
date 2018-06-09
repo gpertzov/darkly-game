@@ -4,24 +4,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -82,6 +72,8 @@ public class GameScreen extends ScreenAdapter {
     private TextureAtlas lights;
     private FrameBuffer lightBuffer;
     private TextureRegion fboTexturRegion;
+    private Texture attackSheet;
+    private Animation<TextureRegion> attackAnim;
 
     public GameScreen(final DarklyGame game) {
         this.game = game;
@@ -106,6 +98,11 @@ public class GameScreen extends ScreenAdapter {
         lights = new TextureAtlas(Gdx.files.internal("art/lights.atlas"));
         final TextureRegion lightTexture = lights.findRegion(SPOTLIGHT);
         final TextureRegion flashlightTexture = lights.findRegion(FLASHLIGHT);
+
+        // Load attack animation
+        attackSheet = new Texture(Gdx.files.internal("art/attacks.png"));
+        final TextureRegion[][] attackFrames = TextureRegion.split(attackSheet, TILE_SIZE, TILE_SIZE);
+        attackAnim = new Animation<>(0.08f, attackFrames[1]);
 
         // Setup player entity
         final Vector2 position = level.getPosition(PLAYER_START);
@@ -276,8 +273,13 @@ public class GameScreen extends ScreenAdapter {
 
         // Render entities
         final Vector2 enemyPosition = enemy.getPosition();
+        final float attackTime = enemy.getAttackTime();
         batch.begin();
         batch.draw(player.getSprite(), playerPosition.x, playerPosition.y, 1, 1);
+        if (attackTime > 0 && !attackAnim.isAnimationFinished(attackTime)) {
+            final TextureRegion attackFrame = attackAnim.getKeyFrame(attackTime, false);
+            batch.draw(attackFrame, playerPosition.x, playerPosition.y, 1, 1);
+        }
         batch.draw(enemy.getSprite(), enemyPosition.x, enemyPosition.y, 1, 1);
         batch.end();
 
@@ -335,12 +337,17 @@ public class GameScreen extends ScreenAdapter {
             player.reactTo(event);
         }
 
+        // Update enemy entity
+        enemy.update(delta);
+
+        // TODO - Refactor to use event system
+        if (EnemyEntity.ENEMY_STATE.ATTACK.equals(enemy.getState())) {
+            player.reactTo(new TriggeredEvent(TriggeredEvent.Type.HARM, enemy.getAttackDamage()));
+        }
+
         if (player.getHealthLevel() <= 0) {
             endGame("Too bad, Try again");
         }
-
-        // Update enemy entity
-        enemy.update(delta);
     }
 
     private boolean consumeGameEvent(final TriggeredEvent event) {
@@ -388,5 +395,6 @@ public class GameScreen extends ScreenAdapter {
         uiAtlas.dispose();
         level.dispose();
         batch.dispose();
+        attackSheet.dispose();
     }
 }

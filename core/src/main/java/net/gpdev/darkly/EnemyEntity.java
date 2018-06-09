@@ -9,16 +9,40 @@ import java.util.List;
 
 public class EnemyEntity extends GameEntity {
 
+    // TODO - Load enemy attributes from Level
     private static final int DISTANCE_RANGE = 16;
     private static final int TARGET_RANGE = 3;
-    private static final float INTERCEPT_RADIUS_2 = 0.5f;
+    private static final float INTERCEPT_RADIUS_2 = 1f;
+    private static final float ATTACK_COOL_DOWN = 2f;
+    private static final int ATTACK_DAMAGE = 10;
+
     private float distanceToMove = 0;
+    private float attackTime = 0f;
+    private ENEMY_STATE state;
+
+    public enum ENEMY_STATE {
+        SEEK,
+        INTERCEPT,
+        ATTACK
+    }
 
     public EnemyEntity(final Sprite sprite,
                        final Vector2 position,
                        final float speed,
                        final Rectangle boundingBox) {
         super(sprite, position, speed, boundingBox);
+    }
+
+    public float getAttackTime() {
+        return attackTime;
+    }
+
+    public int getAttackDamage() {
+        return ATTACK_DAMAGE;
+    }
+
+    public ENEMY_STATE getState() {
+        return state;
     }
 
     @Override
@@ -39,8 +63,16 @@ public class EnemyEntity extends GameEntity {
             }
 
             // ATTACK //
+            if (attackTime == 0 || attackTime > ATTACK_COOL_DOWN) {
+                attackTime = 0f;
+                state = ENEMY_STATE.ATTACK;
+            } else {
+                state = ENEMY_STATE.INTERCEPT;
+            }
+            attackTime += delta;
         } else {
             // SEEK //
+            state = ENEMY_STATE.SEEK;
 
             // Wander randomly
             if (distanceToMove <= 0 || getVelocity().isZero()) {
