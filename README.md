@@ -10,7 +10,7 @@ Implemented so far:
 * Player collision detection with map objects
 * Lightmaps using Framebuffer Object (FBO)
 * Rudimentary Scene2d GUI (status bars)
-* Map triggered events (power-ups, hazzards)
+* Map triggered events (power-ups, hazards)
 * Enemy drone
 * Enemy attack animation
 
