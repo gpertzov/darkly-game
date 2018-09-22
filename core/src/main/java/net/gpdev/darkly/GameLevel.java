@@ -12,6 +12,7 @@ import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
+import net.gpdev.darkly.actors.GameEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +27,9 @@ public class GameLevel implements Disposable {
 
     private final TiledMap map;
     private final float unitScale;
-    private MapLayer positionsLayer;
-    private MapLayer collisionLayer;
-    private TiledMapTileLayer triggersLayer;
+    private final MapLayer positionsLayer;
+    private final MapLayer collisionLayer;
+    private final TiledMapTileLayer triggersLayer;
     private final int mapWidth;
     private final int mapHeight;
 
@@ -61,13 +62,13 @@ public class GameLevel implements Disposable {
     }
 
     public Vector2 getPosition(final String positionId) {
-        Vector2 position = new Vector2(0, 0);
+        final Vector2 position = new Vector2(0, 0);
         if (positionsLayer != null) {
             try {
                 final MapObjects objects = positionsLayer.getObjects();
                 final RectangleMapObject positionRect = (RectangleMapObject) objects.get(positionId);
                 positionRect.getRectangle().getPosition(position);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 Gdx.app.error(TAG, "Failed to obtain position '" + positionId + "': " + e.getMessage());
             }
         } else {

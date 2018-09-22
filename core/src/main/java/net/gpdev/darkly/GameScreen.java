@@ -15,9 +15,16 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import net.gpdev.darkly.actions.Attack;
+import net.gpdev.darkly.actions.EntityAction;
+import net.gpdev.darkly.actions.Move;
+import net.gpdev.darkly.actors.EnemyEntity;
+import net.gpdev.darkly.actors.GameEntity;
+import net.gpdev.darkly.actors.PlayerEntity;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 import static com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import static net.gpdev.darkly.DarklyGame.FLASHLIGHT;
@@ -137,7 +144,7 @@ public class GameScreen extends ScreenAdapter {
         // Input processing // TODO - Extract to class
         Gdx.input.setInputProcessor(new InputAdapter() {
             @Override
-            public boolean keyDown(int keycode) {
+            public boolean keyDown(final int keycode) {
                 if (keycode == Keys.LEFT) {
                     player.updateDirection(new Vector2(-1f, 0));
                     return true;
@@ -161,7 +168,7 @@ public class GameScreen extends ScreenAdapter {
             }
 
             @Override
-            public boolean keyUp(int keycode) {
+            public boolean keyUp(final int keycode) {
                 if (keycode == Keys.ESCAPE) {
                     Gdx.app.exit();
                 }
@@ -229,7 +236,7 @@ public class GameScreen extends ScreenAdapter {
     }
 
     @Override
-    public void render(float delta) {
+    public void render(final float delta) {
         switch (state) {
             case PLAYING: {
                 update(delta);
@@ -318,16 +325,22 @@ public class GameScreen extends ScreenAdapter {
         uiStage.draw();
     }
 
-    private void update(float delta) {
+    private void update(final float delta) {
         // Update player entity
-        final Vector2 currentPlayerPosition = player.getPosition();
-        player.update(delta);
+        final Optional<EntityAction> playerAction = player.update(delta);
 
-        // Detect player's collisions with level
-        final Rectangle boundingBox = player.getBoundingBox();
-        if (level.isCollision(boundingBox)) {
-            // Revert player's position update
-            player.setPosition(currentPlayerPosition);
+        // TODO - Refactor to resloveMoveAction()
+        if (playerAction.isPresent()) {
+            final Move move = (Move) playerAction.get();
+            final GameEntity entity = move.getSource();
+            final Vector2 destination = move.getDestination();
+            // Detect collisions with level
+            final Rectangle boundingBox = entity.getBoundingBox();
+            boundingBox.setPosition(destination);
+            if (!level.isCollision(boundingBox)) {
+                // Move entity to destination
+                entity.setPosition(destination);
+            }
         }
 
         // Check level triggered events
@@ -338,11 +351,26 @@ public class GameScreen extends ScreenAdapter {
         }
 
         // Update enemy entity
-        enemy.update(delta);
+        final Optional<EntityAction> enemyAction = enemy.update(delta);
+        if (enemyAction.isPresent()) {
+            final EntityAction action = enemyAction.get();
+            switch (action.getType()) {
 
-        // TODO - Refactor to use event system
-        if (EnemyEntity.ENEMY_STATE.ATTACK.equals(enemy.getState())) {
-            player.reactTo(new TriggeredEvent(TriggeredEvent.Type.HARM, enemy.getAttackDamage()));
+                case MOVE: {
+                    final Move move = (Move) action;
+                    move.getSource().setPosition(move.getDestination());
+                }
+                break;
+                case ATTACK: {
+                    final Attack attack = (Attack) action;
+                    // TODO dice roll
+                    attack.getTarget().reactTo(new TriggeredEvent(TriggeredEvent.Type.HARM, attack.getMaxDamage()));
+                }
+                break;
+
+                default:
+                    throw new RuntimeException("Invalid entity action: " + action.getType());
+            }
         }
 
         if (player.getHealthLevel() <= 0) {
@@ -372,7 +400,7 @@ public class GameScreen extends ScreenAdapter {
     }
 
     @Override
-    public void resize(int width, int height) {
+    public void resize(final int width, final int height) {
         viewport.update(width, height);
         uiStage.getViewport().update(width, height, true);
 

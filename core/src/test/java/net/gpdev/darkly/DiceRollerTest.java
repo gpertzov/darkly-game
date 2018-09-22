@@ -25,7 +25,7 @@ public class DiceRollerTest {
     @Test
     public void testRoll1d20() {
         for (int i = 0; i < REPETITIONS; i++) {
-            List<Integer> results = diceRoller.roll(1, 20);
+            final List<Integer> results = diceRoller.roll(1, 20);
             assertEquals(1, results.size());
             final Integer roll = results.get(0);
             assertTrue(roll >= 1);
@@ -36,7 +36,7 @@ public class DiceRollerTest {
     @Test
     public void testRoll3d6() {
         for (int i = 0; i < REPETITIONS; i++) {
-            List<Integer> results = diceRoller.roll(3, 6);
+            final List<Integer> results = diceRoller.roll(3, 6);
             assertEquals(3, results.size());
            results.forEach(roll -> {
                assertTrue(roll >= 1);

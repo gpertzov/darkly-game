@@ -1,9 +1,15 @@
-package net.gpdev.darkly;
+package net.gpdev.darkly.actors;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import net.gpdev.darkly.Light;
+import net.gpdev.darkly.TriggeredEvent;
+import net.gpdev.darkly.actions.EntityAction;
+import net.gpdev.darkly.actions.Move;
+
+import java.util.Optional;
 
 import static net.gpdev.darkly.DarklyGame.FLASHLIGHT;
 
@@ -14,7 +20,7 @@ public class PlayerEntity extends GameEntity {
     private float flashlightRotation = 0f;
     private float health = 1f;
     private float battery = 1f;
-    private Light flashlight;
+    private final Light flashlight;
 
     public PlayerEntity(final Sprite sprite,
                         final Vector2 position,
@@ -39,7 +45,7 @@ public class PlayerEntity extends GameEntity {
     }
 
     @Override
-    public void update(final float delta) {
+    public Optional<EntityAction> update(final float delta) {
         super.update(delta);
 
         // Compute flashlight rotation
@@ -48,10 +54,6 @@ public class PlayerEntity extends GameEntity {
             flashlightRotation = curVelocity.angle() - 90;
         }
         flashlight.getSprite().setRotation(flashlightRotation);
-
-        // Update position
-        final Vector2 velocity = getVelocity().scl(delta);
-        setPosition(getPosition().add(velocity));
 
         // Deplete battery
         if (flashlight.isEnabled()) {
@@ -63,6 +65,10 @@ public class PlayerEntity extends GameEntity {
             battery = 0;
             flashlight.setEnabled(false);
         }
+
+        // Update position
+        final Vector2 velocity = getVelocity().scl(delta);
+        return Optional.of(new Move(this, getPosition().add(velocity)));
     }
 
     @Override

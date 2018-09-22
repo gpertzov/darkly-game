@@ -1,4 +1,4 @@
-package net.gpdev.darkly;
+package net.gpdev.darkly.actors;
 
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -6,18 +6,19 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import net.gpdev.darkly.GameLevel;
+import net.gpdev.darkly.Light;
+import net.gpdev.darkly.TriggeredEvent;
+import net.gpdev.darkly.actions.EntityAction;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class GameEntity {
 
     // TODO - Extract into separate components //
     // Graphics
-    private Sprite sprite;
-    private Map<String, Light> lights;
+    private final Sprite sprite;
+    private final Map<String, Light> lights;
 
     // Physics
     private final float speed;
@@ -77,11 +78,11 @@ public class GameEntity {
         return Collections.unmodifiableCollection(lights.values());
     }
 
-    public void update(float delta) {
-
+    public Optional<EntityAction> update(final float delta) {
+        return Optional.empty();
     }
 
-    public void reactTo(TriggeredEvent event) {
+    public void reactTo(final TriggeredEvent event) {
 
     }
 

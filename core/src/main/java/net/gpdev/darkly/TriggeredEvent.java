@@ -13,8 +13,8 @@ public class TriggeredEvent {
         WIN
     }
 
-    private Type type;
-    private int amount;
+    private final Type type;
+    private final int amount;
 
     public TriggeredEvent(final Type type, final int amount) {
         this.type = type;
@@ -32,7 +32,7 @@ public class TriggeredEvent {
             final Type type = Type.valueOf(eventType);
             final int amount = properties.get("amount", 0, Integer.class);
             event = new TriggeredEvent(type, amount);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             Gdx.app.error(TAG, "Invalid event type: " + eventType);
         }
 
