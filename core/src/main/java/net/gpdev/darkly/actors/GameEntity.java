@@ -23,6 +23,7 @@ public class GameEntity {
     // Physics
     private final float speed;
     private final Rectangle boundingBox;
+    private final boolean isCollidable;
     private Vector2 position;
     private Vector2 velocity;
 
@@ -33,11 +34,13 @@ public class GameEntity {
     public GameEntity(final Sprite sprite,
                       final Vector2 position,
                       final float speed,
-                      final Rectangle boundingBox) {
+                      final Rectangle boundingBox,
+                      final boolean isCollidable) {
         this.sprite = sprite;
         this.position = position;
         this.speed = speed;
         this.boundingBox = boundingBox;
+        this.isCollidable = isCollidable;
 
         velocity = new Vector2(0, 0);
         lights = new HashMap<>();
@@ -68,6 +71,10 @@ public class GameEntity {
 
     public Rectangle getBoundingBox() {
         return new Rectangle(boundingBox);
+    }
+
+    public boolean isCollidable() {
+        return isCollidable;
     }
 
     public void addLight(final String name, final Light light) {

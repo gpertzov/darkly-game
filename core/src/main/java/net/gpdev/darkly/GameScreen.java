@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Queue;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import net.gpdev.darkly.actions.Attack;
@@ -24,6 +25,7 @@ import net.gpdev.darkly.actors.PlayerEntity;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Optional;
 
 import static com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
@@ -59,6 +61,7 @@ public class GameScreen extends ScreenAdapter {
     }
 
     private final DarklyGame game;
+    private final Queue<EntityAction> actionQueue = new Queue<>();
     private State state;
     private PlayerEntity player;
     private EnemyEntity enemy;
@@ -116,7 +119,7 @@ public class GameScreen extends ScreenAdapter {
         final TextureRegion playerSprite = sprites.findRegion(PLAYER_SPRITE);
         final Rectangle boundingBox = new Rectangle((TILE_SIZE - PLAYER_WIDTH) / 2.0f, (TILE_SIZE - PLAYER_HEIGHT) / 2.0f,
                 PLAYER_WIDTH, PLAYER_HEIGHT / 2.0f);
-        player = new PlayerEntity(new Sprite(playerSprite), position, PLAYER_SPEED, boundingBox, new Sprite(flashlightTexture));
+        player = new PlayerEntity(new Sprite(playerSprite), position, PLAYER_SPEED, boundingBox, true, new Sprite(flashlightTexture));
         final Sprite heroLight = new Sprite(lightTexture);
         heroLight.setColor(Color.LIGHT_GRAY);
         player.addLight(SPOTLIGHT, new Light(heroLight, true));
@@ -125,7 +128,7 @@ public class GameScreen extends ScreenAdapter {
         final Vector2 enemyPosition = level.getPosition(ENEMY_START);
         final TextureRegion enemyTexture = sprites.findRegion(ENEMY_SPRITE);
         final Sprite enemySprite = new Sprite(enemyTexture);
-        enemy = new EnemyEntity(enemySprite, enemyPosition, ENEMY_SPEED, new Rectangle(0, 0, 1, 1));
+        enemy = new EnemyEntity(enemySprite, enemyPosition, ENEMY_SPEED, new Rectangle(0, 0, 1, 1), false);
         final Sprite enemyLight = new Sprite(lightTexture);
         enemyLight.setScale(3);
         enemy.addLight(SPOTLIGHT, new Light(enemyLight, true));
@@ -328,49 +331,20 @@ public class GameScreen extends ScreenAdapter {
     private void update(final float delta) {
         // Update player entity
         final Optional<EntityAction> playerAction = player.update(delta);
+        playerAction.ifPresent(action -> actionQueue.addLast(action));
 
-        // TODO - Refactor to resloveMoveAction()
-        if (playerAction.isPresent()) {
-            final Move move = (Move) playerAction.get();
-            final GameEntity entity = move.getSource();
-            final Vector2 destination = move.getDestination();
-            // Detect collisions with level
-            final Rectangle boundingBox = entity.getBoundingBox();
-            boundingBox.setPosition(destination);
-            if (!level.isCollision(boundingBox)) {
-                // Move entity to destination
-                entity.setPosition(destination);
-            }
-        }
+        // Update enemy entity
+        final Optional<EntityAction> enemyAction = enemy.update(delta);
+        enemyAction.ifPresent(action -> actionQueue.addLast(action));
+
+        // Handle action queue
+        executeEntityActions();
 
         // Check level triggered events
         final Vector2 playerCenter = player.getPosition().add(0.5f, 0.5f);
         final TriggeredEvent event = level.consumeTrigger((int) playerCenter.x, (int) playerCenter.y);
         if (!consumeGameEvent(event)) {
             player.reactTo(event);
-        }
-
-        // Update enemy entity
-        final Optional<EntityAction> enemyAction = enemy.update(delta);
-        if (enemyAction.isPresent()) {
-            final EntityAction action = enemyAction.get();
-            switch (action.getType()) {
-
-                case MOVE: {
-                    final Move move = (Move) action;
-                    move.getSource().setPosition(move.getDestination());
-                }
-                break;
-                case ATTACK: {
-                    final Attack attack = (Attack) action;
-                    // TODO dice roll
-                    attack.getTarget().reactTo(new TriggeredEvent(TriggeredEvent.Type.HARM, attack.getMaxDamage()));
-                }
-                break;
-
-                default:
-                    throw new RuntimeException("Invalid entity action: " + action.getType());
-            }
         }
 
         if (player.getHealthLevel() <= 0) {
@@ -389,6 +363,41 @@ public class GameScreen extends ScreenAdapter {
         }
 
         return false;
+    }
+
+    private void executeEntityActions() {
+        final Iterator<EntityAction> actionIterator = actionQueue.iterator();
+        while (actionIterator.hasNext()) {
+            final EntityAction action = actionIterator.next();
+            actionIterator.remove();
+            switch (action.getType()) {
+                case MOVE: {
+                    final Move move = (Move) action;
+                    final GameEntity entity = move.getSource();
+                    final Vector2 destination = move.getDestination();
+                    // Detect collisions with level
+                    if (entity.isCollidable()) {
+                        final Rectangle boundingBox = entity.getBoundingBox();
+                        boundingBox.setPosition(destination);
+                        if (level.isCollision(boundingBox)) {
+                            break;
+                        }
+                    }
+                    // Move entity to destination
+                    entity.setPosition(destination);
+                }
+                break;
+                case ATTACK: {
+                    final Attack attack = (Attack) action;
+                    // TODO dice roll
+                    attack.getTarget().reactTo(new TriggeredEvent(TriggeredEvent.Type.HARM, attack.getMaxDamage()));
+                }
+                break;
+
+                default:
+                    throw new RuntimeException("Invalid entity action: " + action.getType());
+            }
+        }
     }
 
     private void endGame(final String message) {

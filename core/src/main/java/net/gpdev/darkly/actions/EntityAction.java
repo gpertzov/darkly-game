@@ -29,4 +29,13 @@ public abstract class EntityAction {
     public GameEntity getTarget() {
         return target;
     }
+
+    @Override
+    public String toString() {
+        return "EntityAction{" +
+                "type=" + type +
+                ", source=" + source +
+                ", target=" + target +
+                '}';
+    }
 }

@@ -33,8 +33,9 @@ public class EnemyEntity extends GameEntity {
     public EnemyEntity(final Sprite sprite,
                        final Vector2 position,
                        final float speed,
-                       final Rectangle boundingBox) {
-        super(sprite, position, speed, boundingBox);
+                       final Rectangle boundingBox,
+                       final boolean isCollidable) {
+        super(sprite, position, speed, boundingBox, isCollidable);
     }
 
     public float getAttackTime() {

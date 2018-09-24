@@ -26,8 +26,9 @@ public class PlayerEntity extends GameEntity {
                         final Vector2 position,
                         final float speed,
                         final Rectangle boundingBox,
+                        final boolean isCollidable,
                         final Sprite flashlightSprite) {
-        super(sprite, position, speed, boundingBox);
+        super(sprite, position, speed, boundingBox, isCollidable);
         this.flashlight = new Light(flashlightSprite, false);
         addLight(FLASHLIGHT, flashlight);
     }
