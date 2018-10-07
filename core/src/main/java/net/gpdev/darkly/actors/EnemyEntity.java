@@ -18,7 +18,7 @@ public class EnemyEntity extends GameEntity {
     private static final int TARGET_RANGE = 3;
     private static final float INTERCEPT_RADIUS_2 = 1f;
     private static final float ATTACK_COOL_DOWN = 2f;
-    private static final int ATTACK_SKILL = 18;
+    private static final int ATTACK_SKILL = 12;
     private static final int ATTACK_DAMAGE = 10;
 
     private float distanceToMove = 0;

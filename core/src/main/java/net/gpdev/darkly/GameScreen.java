@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Queue;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import net.gpdev.darkly.actions.Attack;
@@ -62,6 +63,7 @@ public class GameScreen extends ScreenAdapter {
 
     private final DarklyGame game;
     private final Queue<EntityAction> actionQueue = new Queue<>();
+    private final DiceRoller diceRoller = new DiceRoller(TimeUtils.millis());
     private State state;
     private PlayerEntity player;
     private EnemyEntity enemy;
@@ -389,8 +391,10 @@ public class GameScreen extends ScreenAdapter {
                 break;
                 case ATTACK: {
                     final Attack attack = (Attack) action;
-                    // TODO dice roll
-                    attack.getTarget().reactTo(new TriggeredEvent(TriggeredEvent.Type.HARM, attack.getMaxDamage()));
+                    final int rollSum = diceRoller.rollSum(3, 6);
+                    if (rollSum <= attack.getAttackSkill()) {
+                        attack.getTarget().reactTo(new TriggeredEvent(TriggeredEvent.Type.HARM, attack.getMaxDamage()));
+                    }
                 }
                 break;
 

@@ -22,4 +22,8 @@ public class DiceRoller {
                 .limit(numDice)
                 .boxed().collect(toList());
     }
+
+    int rollSum(final int numDice, final int numSides) {
+        return roll(numDice, numSides).stream().mapToInt(Integer::intValue).sum();
+    }
 }
