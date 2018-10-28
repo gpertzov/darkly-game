@@ -10,8 +10,11 @@ import net.gpdev.darkly.GameLevel;
 import net.gpdev.darkly.Light;
 import net.gpdev.darkly.TriggeredEvent;
 import net.gpdev.darkly.actions.EntityAction;
+import net.gpdev.darkly.actions.Idle;
 
 import java.util.*;
+
+import static net.gpdev.darkly.actions.Idle.IDLE_ACTION;
 
 public class GameEntity {
 
@@ -85,8 +88,8 @@ public class GameEntity {
         return Collections.unmodifiableCollection(lights.values());
     }
 
-    public Optional<EntityAction> update(final float delta) {
-        return Optional.empty();
+    public EntityAction update(final float delta) {
+        return IDLE_ACTION;
     }
 
     public void reactTo(final TriggeredEvent event) {

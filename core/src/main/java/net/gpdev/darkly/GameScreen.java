@@ -27,7 +27,6 @@ import net.gpdev.darkly.actors.PlayerEntity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Optional;
 
 import static com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import static net.gpdev.darkly.DarklyGame.FLASHLIGHT;
@@ -332,12 +331,12 @@ public class GameScreen extends ScreenAdapter {
 
     private void update(final float delta) {
         // Update player entity
-        final Optional<EntityAction> playerAction = player.update(delta);
-        playerAction.ifPresent(action -> actionQueue.addLast(action));
+        final EntityAction playerAction = player.update(delta);
+        actionQueue.addLast(playerAction);
 
         // Update enemy entity
-        final Optional<EntityAction> enemyAction = enemy.update(delta);
-        enemyAction.ifPresent(action -> actionQueue.addLast(action));
+        final EntityAction enemyAction = enemy.update(delta);
+        actionQueue.addLast(enemyAction);
 
         // Handle action queue
         executeEntityActions();
@@ -397,7 +396,10 @@ public class GameScreen extends ScreenAdapter {
                     }
                 }
                 break;
+                case IDLE: {
 
+                }
+                break;
                 default:
                     throw new RuntimeException("Invalid entity action: " + action.getType());
             }

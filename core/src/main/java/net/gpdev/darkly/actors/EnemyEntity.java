@@ -9,7 +9,8 @@ import net.gpdev.darkly.actions.EntityAction;
 import net.gpdev.darkly.actions.Move;
 
 import java.util.List;
-import java.util.Optional;
+
+import static net.gpdev.darkly.actions.Idle.IDLE_ACTION;
 
 public class EnemyEntity extends GameEntity {
 
@@ -43,10 +44,10 @@ public class EnemyEntity extends GameEntity {
     }
 
     @Override
-    public Optional<EntityAction> update(final float delta) {
+    public EntityAction update(final float delta) {
         super.update(delta);
 
-        Optional<EntityAction> action = Optional.empty();
+        EntityAction action = IDLE_ACTION;
 
         final List<GameEntity> targets = level.getEntitiesInRange(this, getPosition(), TARGET_RANGE);
 
@@ -66,7 +67,7 @@ public class EnemyEntity extends GameEntity {
             if (attackTime == 0 || attackTime > ATTACK_COOL_DOWN) {
                 attackTime = 0f;
                 state = ENEMY_STATE.ATTACK;
-                action = Optional.of(new Attack(this, target, ATTACK_SKILL, ATTACK_DAMAGE));
+                action = new Attack(this, target, ATTACK_SKILL, ATTACK_DAMAGE);
             } else {
                 state = ENEMY_STATE.INTERCEPT;
             }
@@ -96,7 +97,7 @@ public class EnemyEntity extends GameEntity {
             final Rectangle bbox = getBoundingBox();
             if (!level.isOutOfBounds(new Rectangle(newPosition.x, newPosition.y, bbox.width, bbox.height))) {
                 distanceToMove -= scaledVelocity.len();
-                action = Optional.of(new Move(this, newPosition));
+                action = new Move(this, newPosition);
             } else {
                 distanceToMove = 0;
             }

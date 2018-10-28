@@ -4,6 +4,7 @@ import net.gpdev.darkly.actors.GameEntity;
 
 public abstract class EntityAction {
     public enum Type {
+        IDLE,
         MOVE,
         ATTACK
     }

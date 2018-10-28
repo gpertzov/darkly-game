@@ -9,9 +9,8 @@ import net.gpdev.darkly.TriggeredEvent;
 import net.gpdev.darkly.actions.EntityAction;
 import net.gpdev.darkly.actions.Move;
 
-import java.util.Optional;
-
 import static net.gpdev.darkly.DarklyGame.FLASHLIGHT;
+import static net.gpdev.darkly.actions.Idle.IDLE_ACTION;
 
 public class PlayerEntity extends GameEntity {
 
@@ -46,7 +45,7 @@ public class PlayerEntity extends GameEntity {
     }
 
     @Override
-    public Optional<EntityAction> update(final float delta) {
+    public EntityAction update(final float delta) {
         super.update(delta);
 
         // Compute flashlight rotation
@@ -69,7 +68,10 @@ public class PlayerEntity extends GameEntity {
 
         // Update position
         final Vector2 velocity = getVelocity().scl(delta);
-        return Optional.of(new Move(this, getPosition().add(velocity)));
+        if (velocity.isZero()) {
+            return IDLE_ACTION;
+        }
+        return new Move(this, getPosition().add(velocity));
     }
 
     @Override
