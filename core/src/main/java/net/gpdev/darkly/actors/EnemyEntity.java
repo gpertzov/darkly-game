@@ -76,8 +76,15 @@ public class EnemyEntity extends GameEntity {
             // SEEK //
             state = ENEMY_STATE.SEEK;
 
-            // Wander randomly
-            if (distanceToMove <= 0 || getVelocity().isZero()) {
+            // Detect suspicious light sources
+            final List<Vector2> functionalLightsPositions = level.getFunctionalLightsPositions(this, getPosition());
+            if (!functionalLightsPositions.isEmpty()) {
+                // Set a course to the position of the first light
+                final Vector2 lightPosition = functionalLightsPositions.get(0);
+                final Vector2 sub = lightPosition.sub(getPosition());
+                distanceToMove = sub.len();
+                setDirection(sub.nor());
+            } else if (distanceToMove <= 0 || getVelocity().isZero()) {
                 // Pick a random direction
                 final float xDir = MathUtils.random(-1, 1);
                 final float yDir = MathUtils.random(-1, 1);

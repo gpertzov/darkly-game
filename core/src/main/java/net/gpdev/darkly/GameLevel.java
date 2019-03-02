@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.Disposable;
 import net.gpdev.darkly.actors.GameEntity;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -86,6 +87,22 @@ public class GameLevel implements Disposable {
         return entities.stream()
                 .filter(entity -> entity != self && entity.getPosition().dst2(position) <= range2)
                 .collect(Collectors.toList());
+    }
+
+    public List<Vector2> getFunctionalLightsPositions(final GameEntity self, final Vector2 position) {
+        final List<Vector2> lightPositions = new ArrayList<>();
+        for (final GameEntity entity : entities) {
+            if (entity == self) {
+                continue;
+            }
+            final Collection<Light> lights = entity.getLights();
+            for (final Light light : lights) {
+                if (light.isFunctional() && light.isEnabled()) {
+                    lightPositions.add(entity.getPosition());
+                }
+            }
+        }
+        return lightPositions;
     }
 
     public boolean isOutOfBounds(final Rectangle rect) {
