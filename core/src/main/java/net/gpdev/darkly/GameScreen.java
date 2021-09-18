@@ -11,7 +11,9 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Queue;
 import com.badlogic.gdx.utils.TimeUtils;
@@ -70,8 +72,8 @@ public class GameScreen extends ScreenAdapter {
     private Skin uiSkin;
     private Stage uiStage;
     private TextureAtlas uiAtlas;
-    private Image batteryLevel;
-    private Image healthLevel;
+    private FillBarWidget batteryLevel;
+    private FillBarWidget healthLevel;
     private Label messageText;
 
     private OrthographicCamera camera;
@@ -200,37 +202,25 @@ public class GameScreen extends ScreenAdapter {
         uiSkin = new Skin(Gdx.files.internal("art/uiskin.json"));
         uiStage = new Stage(new ScreenViewport());
         uiAtlas = new TextureAtlas("art/ui.atlas");
-        final TextureRegion barRegion = uiAtlas.findRegion(BAR_ID);
+        final AtlasRegion barRegion = uiAtlas.findRegion(BAR_ID);
+        final AtlasRegion fillbarRegion = uiAtlas.findRegion(FILLBAR_ID);
         final float widgetWidth = barRegion.getRegionWidth();
         final float widgetHeight = barRegion.getRegionHeight();
-        final AtlasRegion fillbarRegion = uiAtlas.findRegion(FILLBAR_ID);
 
-        // Battery bar widget
-        final Image batteryBar = new Image(barRegion);
-        batteryLevel = new Image(fillbarRegion);
-        batteryLevel.setPosition(fillbarRegion.offsetX, fillbarRegion.offsetY);
-        final WidgetGroup batteryWidget = new WidgetGroup();
-        batteryWidget.addActor(batteryBar);
-        batteryWidget.addActor(batteryLevel);
-        batteryLevel.setColor(Color.BLUE);
+        // Battery level widget
+        batteryLevel = new FillBarWidget(barRegion, fillbarRegion, Color.BLUE);
 
-        // Health bar widget
-        final Image healthBar = new Image(barRegion);
-        healthLevel = new Image(fillbarRegion);
-        healthLevel.setPosition(fillbarRegion.offsetX, fillbarRegion.offsetY);
-        final WidgetGroup healthWidget = new WidgetGroup();
-        healthWidget.addActor(healthBar);
-        healthWidget.addActor(healthLevel);
-        healthLevel.setColor(Color.RED);
+        // Health level widget
+        healthLevel = new FillBarWidget(barRegion, fillbarRegion, Color.RED);
 
         // Layout
         final Table table = new Table(uiSkin);
         table.defaults().grow().pad(UI_PADDING);
         table.add(HEALTH_TEXT);
-        table.add(healthWidget).size(widgetWidth, widgetHeight);
+        table.add(healthLevel).size(widgetWidth, widgetHeight);
         table.row();
         table.add(BATTERY_TEXT);
-        table.add(batteryWidget).size(widgetWidth, widgetHeight);
+        table.add(batteryLevel).size(widgetWidth, widgetHeight);
         table.pack();
 
         messageText = new Label("", uiSkin);
@@ -258,8 +248,8 @@ public class GameScreen extends ScreenAdapter {
         }
 
         // Update UI
-        batteryLevel.setWidth(batteryLevel.getPrefWidth() * player.getBatteryLevel());
-        healthLevel.setWidth(healthLevel.getPrefWidth() * player.getHealthLevel());
+        batteryLevel.setValue(player.getBatteryLevel());
+        healthLevel.setValue(player.getHealthLevel());
         uiStage.act(delta);
 
         // Render to display //
