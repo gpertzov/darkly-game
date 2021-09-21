@@ -51,7 +51,7 @@ public class PlayerEntity extends GameEntity {
         // Compute flashlight rotation
         final Vector2 curVelocity = getVelocity();
         if (!curVelocity.isZero()) {
-            flashlightRotation = curVelocity.angle() - 90;
+            flashlightRotation = curVelocity.angleDeg() - 90;
         }
         flashlight.getSprite().setRotation(flashlightRotation);
 
