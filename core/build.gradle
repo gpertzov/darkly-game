@@ -1,12 +1,14 @@
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 test {
-  useJUnit()
+  useJUnitPlatform()
 }
 
 dependencies {
   api "com.badlogicgames.ashley:ashley:$ashleyVersion"
   api "com.badlogicgames.gdx:gdx:$gdxVersion"
 
-  testImplementation "junit:junit:$jUnitVersion"
+  testImplementation(platform('org.junit:junit-bom:5.11.1'))
+  testImplementation('org.junit.jupiter:junit-jupiter')
+  testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 }
