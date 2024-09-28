@@ -11,9 +11,7 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Queue;
 import com.badlogic.gdx.utils.TimeUtils;
@@ -22,6 +20,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import net.gpdev.darkly.actions.Attack;
 import net.gpdev.darkly.actions.EntityAction;
 import net.gpdev.darkly.actions.Move;
+import net.gpdev.darkly.actors.DecoyEntity;
 import net.gpdev.darkly.actors.EnemyEntity;
 import net.gpdev.darkly.actors.GameEntity;
 import net.gpdev.darkly.actors.PlayerEntity;
@@ -29,6 +28,7 @@ import net.gpdev.darkly.actors.PlayerEntity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import static com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import static net.gpdev.darkly.DarklyGame.FLASHLIGHT;
@@ -55,6 +55,8 @@ public class GameScreen extends ScreenAdapter {
     private static final String BATTERY_TEXT = "Battery";
     private static final String BAR_ID = "bar";
     private static final String FILLBAR_ID = "fillbar";
+    private static final String DECOYS_TEXT = "Decoys";
+    private static final String DECOY_ID = "decoy";
     private static final Color AMBIENT_LIGHT = new Color(0.01f, 0.01f, 0.02f, 1.0f);
 
     private enum State {
@@ -72,6 +74,9 @@ public class GameScreen extends ScreenAdapter {
     private Skin uiSkin;
     private Stage uiStage;
     private TextureAtlas uiAtlas;
+    private HorizontalGroup decoysWidget;
+    private AtlasRegion decoyRegion;
+
     private FillBarWidget batteryLevel;
     private FillBarWidget healthLevel;
     private Label messageText;
@@ -84,7 +89,7 @@ public class GameScreen extends ScreenAdapter {
     private TextureAtlas sprites;
     private TextureAtlas lights;
     private FrameBuffer lightBuffer;
-    private TextureRegion fboTexturRegion;
+    private TextureRegion fboTextureRegion;
     private Texture attackSheet;
     private Animation<TextureRegion> attackAnim;
 
@@ -141,61 +146,20 @@ public class GameScreen extends ScreenAdapter {
         level.addEntity(player);
         level.addEntity(enemy);
 
+        // Decoys widget
+        for (int i = 0; i < player.getDecoysCount(); i++) {
+            final Image decoyImage = new Image(decoyRegion);
+            decoysWidget.addActor(decoyImage);
+        }
+
         // Setup viewport
         camera = new OrthographicCamera();
         viewport = new ExtendViewport(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, camera);
 
         state = State.PLAYING;
 
-        // Input processing // TODO - Extract to class
-        Gdx.input.setInputProcessor(new InputAdapter() {
-            @Override
-            public boolean keyDown(final int keycode) {
-                if (keycode == Keys.LEFT) {
-                    player.updateDirection(new Vector2(-1f, 0));
-                    return true;
-                }
-                if (keycode == Keys.RIGHT) {
-                    player.updateDirection(new Vector2(1f, 0));
-                    return true;
-                }
-                if (keycode == Keys.UP) {
-                    player.updateDirection(new Vector2(0, 1f));
-                    return true;
-                }
-                if (keycode == Keys.DOWN) {
-                    player.updateDirection(new Vector2(0, -1f));
-                    return true;
-                }
-                if (keycode == Keys.SPACE) {
-                    player.toggleFlashlight();
-                }
-                return super.keyDown(keycode);
-            }
-
-            @Override
-            public boolean keyUp(final int keycode) {
-                if (keycode == Keys.ESCAPE) {
-                    Gdx.app.exit();
-                }
-
-                if (keycode == Keys.LEFT) {
-                    player.updateDirection(new Vector2(1f, 0));
-                    return true;
-                }
-                if (keycode == Keys.RIGHT) {
-                    player.updateDirection(new Vector2(-1f, 0));
-                    return true;
-                }
-                if (keycode == Keys.UP) {
-                    player.updateDirection(new Vector2(0, -1f));
-                }
-                if (keycode == Keys.DOWN) {
-                    player.updateDirection(new Vector2(0, 1f));
-                }
-                return super.keyUp(keycode);
-            }
-        });
+        // Input processing
+        Gdx.input.setInputProcessor(new GameInputAdapter());
     }
 
     private void setupUI() {
@@ -204,8 +168,13 @@ public class GameScreen extends ScreenAdapter {
         uiAtlas = new TextureAtlas("art/ui.atlas");
         final AtlasRegion barRegion = uiAtlas.findRegion(BAR_ID);
         final AtlasRegion fillbarRegion = uiAtlas.findRegion(FILLBAR_ID);
+        decoyRegion = uiAtlas.findRegion(DECOY_ID);
+
         final float widgetWidth = barRegion.getRegionWidth();
         final float widgetHeight = barRegion.getRegionHeight();
+
+        // Decoys widget
+        decoysWidget = new HorizontalGroup();
 
         // Battery level widget
         batteryLevel = new FillBarWidget(barRegion, fillbarRegion, Color.BLUE);
@@ -216,6 +185,9 @@ public class GameScreen extends ScreenAdapter {
         // Layout
         final Table table = new Table(uiSkin);
         table.defaults().grow().pad(UI_PADDING);
+        table.add(DECOYS_TEXT);
+        table.add(decoysWidget).left();
+        table.row();
         table.add(HEALTH_TEXT);
         table.add(healthLevel).size(widgetWidth, widgetHeight);
         table.row();
@@ -265,8 +237,8 @@ public class GameScreen extends ScreenAdapter {
         viewport.apply(false);
 
         // Project entity lights to screen coordinates
-        player.projectLights(camera);
-        enemy.projectLights(camera);
+        final List<GameEntity> entities = level.getEntities();
+        entities.forEach(entity -> entity.projectLights(camera));
 
         // Render map
         mapRenderer.setView(camera);
@@ -275,13 +247,21 @@ public class GameScreen extends ScreenAdapter {
         // Render entities
         final Vector2 enemyPosition = enemy.getPosition();
         final float attackTime = enemy.getAttackTime();
+
         batch.begin();
-        batch.draw(player.getSprite(), playerPosition.x, playerPosition.y, 1, 1);
+
+        // Draw entities
+        entities.forEach(entity -> {
+            final Vector2 position = entity.getPosition();
+            batch.draw(entity.getSprite(), position.x, position.y, 1, 1);
+        });
+
         if (attackTime > 0 && !attackAnim.isAnimationFinished(attackTime)) {
+            // TODO: Change attack anim position to enemy's target's position (not always player, can be a decoy entity)
             final TextureRegion attackFrame = attackAnim.getKeyFrame(attackTime, false);
             batch.draw(attackFrame, playerPosition.x, playerPosition.y, 1, 1);
         }
-        batch.draw(enemy.getSprite(), enemyPosition.x, enemyPosition.y, 1, 1);
+
         batch.end();
 
         camera.setToOrtho(false);
@@ -297,8 +277,7 @@ public class GameScreen extends ScreenAdapter {
 
         // Render light sources to FBO
         final Collection<Light> entityLights = new ArrayList<>();
-        entityLights.addAll(player.getLights());
-        entityLights.addAll(enemy.getLights());
+        entities.forEach(entity -> entityLights.addAll(entity.getLights()));
         batch.begin();
         for (final Light light : entityLights) {
             if (light.isEnabled()) {
@@ -312,7 +291,7 @@ public class GameScreen extends ScreenAdapter {
         // Blend lighting FBO
         batch.setBlendFunction(GL20.GL_DST_COLOR, GL20.GL_ZERO);
         batch.begin();
-        batch.draw(fboTexturRegion, 0, 0);
+        batch.draw(fboTextureRegion, 0, 0);
         batch.end();
 
         // Render UI
@@ -414,8 +393,8 @@ public class GameScreen extends ScreenAdapter {
             lightBuffer.dispose();
         }
         lightBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
-        fboTexturRegion = new TextureRegion(lightBuffer.getColorBufferTexture());
-        fboTexturRegion.flip(false, true);
+        fboTextureRegion = new TextureRegion(lightBuffer.getColorBufferTexture());
+        fboTextureRegion.flip(false, true);
     }
 
     @Override
@@ -429,5 +408,62 @@ public class GameScreen extends ScreenAdapter {
         level.dispose();
         batch.dispose();
         attackSheet.dispose();
+    }
+
+    private class GameInputAdapter extends InputAdapter {
+        @Override
+        public boolean keyDown(final int keycode) {
+            if (keycode == Keys.LEFT) {
+                player.updateDirection(new Vector2(-1f, 0));
+                return true;
+            }
+            if (keycode == Keys.RIGHT) {
+                player.updateDirection(new Vector2(1f, 0));
+                return true;
+            }
+            if (keycode == Keys.UP) {
+                player.updateDirection(new Vector2(0, 1f));
+                return true;
+            }
+            if (keycode == Keys.DOWN) {
+                player.updateDirection(new Vector2(0, -1f));
+                return true;
+            }
+            if (keycode == Keys.SPACE) {
+                player.toggleFlashlight();
+            }
+            if (keycode == Keys.NUMPAD_MULTIPLY && player.getDecoysCount() > 0) {
+                player.useDecoy();
+                decoysWidget.removeActorAt(0, false);
+                decoysWidget.pack();
+                final DecoyEntity decoyEntity = new DecoyEntity(new Sprite(sprites.findRegion("decoy")), player.getPosition(), 0, new Rectangle(0, 0, 1, 1), false, new Sprite(lights.findRegion(SPOTLIGHT)));
+                level.addEntity(decoyEntity);
+            }
+
+            return super.keyDown(keycode);
+        }
+
+        @Override
+        public boolean keyUp(final int keycode) {
+            if (keycode == Keys.ESCAPE) {
+                Gdx.app.exit();
+            }
+
+            if (keycode == Keys.LEFT) {
+                player.updateDirection(new Vector2(1f, 0));
+                return true;
+            }
+            if (keycode == Keys.RIGHT) {
+                player.updateDirection(new Vector2(-1f, 0));
+                return true;
+            }
+            if (keycode == Keys.UP) {
+                player.updateDirection(new Vector2(0, -1f));
+            }
+            if (keycode == Keys.DOWN) {
+                player.updateDirection(new Vector2(0, 1f));
+            }
+            return super.keyUp(keycode);
+        }
     }
 }

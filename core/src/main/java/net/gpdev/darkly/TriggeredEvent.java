@@ -10,7 +10,8 @@ public class TriggeredEvent {
         HEAL,
         HARM,
         CHARGE,
-        WIN
+        WIN,
+        DECOY;
     }
 
     private final Type type;

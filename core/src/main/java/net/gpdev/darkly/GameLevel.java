@@ -16,6 +16,7 @@ import net.gpdev.darkly.actors.GameEntity;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,10 @@ public class GameLevel implements Disposable {
     private final TiledMapTileLayer triggersLayer;
     private final int mapWidth;
     private final int mapHeight;
+
+    public List<GameEntity> getEntities() {
+        return Collections.unmodifiableList(entities);
+    }
 
     private final List<GameEntity> entities;
 

@@ -10,6 +10,7 @@ import net.gpdev.darkly.actions.EntityAction;
 import net.gpdev.darkly.actions.Move;
 
 import static net.gpdev.darkly.DarklyGame.FLASHLIGHT;
+import static net.gpdev.darkly.Light.LIGHT_DEFAULT_INTENSITY;
 import static net.gpdev.darkly.actions.Idle.IDLE_ACTION;
 
 public class PlayerEntity extends GameEntity {
@@ -19,6 +20,7 @@ public class PlayerEntity extends GameEntity {
     private float flashlightRotation = 0f;
     private float health = 1f;
     private float battery = 1f;
+    private int decoys = 2;
     private final Light flashlight;
 
     public PlayerEntity(final Sprite sprite,
@@ -28,7 +30,7 @@ public class PlayerEntity extends GameEntity {
                         final boolean isCollidable,
                         final Sprite flashlightSprite) {
         super(sprite, position, speed, boundingBox, isCollidable);
-        this.flashlight = new Light(flashlightSprite, false, true);
+        this.flashlight = new Light(flashlightSprite, false, true, LIGHT_DEFAULT_INTENSITY);
         addLight(FLASHLIGHT, flashlight);
     }
 
@@ -42,6 +44,10 @@ public class PlayerEntity extends GameEntity {
 
     public float getBatteryLevel() {
         return battery;
+    }
+
+    public float getDecoysCount() {
+        return decoys;
     }
 
     @Override
@@ -94,6 +100,10 @@ public class PlayerEntity extends GameEntity {
                 health -= amount;
             }
             break;
+            case DECOY: {
+                decoys += (int) amount;
+            }
+            break;
             default: {
 
             }
@@ -102,5 +112,9 @@ public class PlayerEntity extends GameEntity {
 
         battery = MathUtils.clamp(battery, 0, 1);
         health = MathUtils.clamp(health, 0, 1);
+    }
+
+    public void useDecoy() {
+        decoys -= 1;
     }
 }

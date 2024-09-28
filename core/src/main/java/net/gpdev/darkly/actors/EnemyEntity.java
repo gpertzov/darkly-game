@@ -55,6 +55,7 @@ public class EnemyEntity extends GameEntity {
         ENEMY_STATE state;
         if (!targets.isEmpty()) {
             // INTERCEPT //
+            // TODO: Target most intense light
             final GameEntity target = targets.get(0);
             final Vector2 dirToTarget = target.getPosition().sub(getPosition());
             if (dirToTarget.len2() > INTERCEPT_RADIUS_2) {
@@ -79,11 +80,12 @@ public class EnemyEntity extends GameEntity {
             // Detect suspicious light sources
             final List<Vector2> functionalLightsPositions = level.getFunctionalLightsPositions(this, getPosition());
             if (!functionalLightsPositions.isEmpty()) {
+                // TODO: Home-in on most intense light
                 // Set a course to the position of the first light
                 final Vector2 lightPosition = functionalLightsPositions.get(0);
                 final Vector2 sub = lightPosition.sub(getPosition());
                 distanceToMove = sub.len();
-                setDirection(sub.nor());
+                setDirection(sub);
             } else if (distanceToMove <= 0 || getVelocity().isZero()) {
                 // Pick a random direction
                 final float xDir = MathUtils.random(-1, 1);
