@@ -1,5 +1,6 @@
 package net.gpdev.darkly.actors;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -25,6 +26,8 @@ public class EnemyEntity extends GameEntity {
     private float distanceToMove = 0;
     private float attackTime = 0f;
 
+    private GameEntity currentTarget = null;
+
     public enum ENEMY_STATE {
         SEEK,
         INTERCEPT,
@@ -43,6 +46,10 @@ public class EnemyEntity extends GameEntity {
         return attackTime;
     }
 
+    public GameEntity getCurrentTarget() {
+        return currentTarget;
+    }
+
     @Override
     public EntityAction update(final float delta) {
         super.update(delta);
@@ -56,8 +63,8 @@ public class EnemyEntity extends GameEntity {
         if (!targets.isEmpty()) {
             // INTERCEPT //
             // TODO: Target most intense light
-            final GameEntity target = targets.get(0);
-            final Vector2 dirToTarget = target.getPosition().sub(getPosition());
+            currentTarget = targets.get(0);
+            final Vector2 dirToTarget = currentTarget.getPosition().sub(getPosition());
             if (dirToTarget.len2() > INTERCEPT_RADIUS_2) {
                 setDirection(dirToTarget);
             } else {
@@ -68,7 +75,7 @@ public class EnemyEntity extends GameEntity {
             if (attackTime == 0 || attackTime > ATTACK_COOL_DOWN) {
                 attackTime = 0f;
                 state = ENEMY_STATE.ATTACK;
-                action = new Attack(this, target, ATTACK_SKILL, ATTACK_DAMAGE);
+                action = new Attack(this, currentTarget, ATTACK_SKILL, ATTACK_DAMAGE);
             } else {
                 state = ENEMY_STATE.INTERCEPT;
             }
@@ -76,6 +83,7 @@ public class EnemyEntity extends GameEntity {
         } else {
             // SEEK //
             state = ENEMY_STATE.SEEK;
+            currentTarget = null;
 
             // Detect suspicious light sources
             final List<Vector2> functionalLightsPositions = level.getFunctionalLightsPositions(this, getPosition());

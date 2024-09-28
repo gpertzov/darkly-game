@@ -57,7 +57,7 @@ public class GameScreen extends ScreenAdapter {
     private static final String FILLBAR_ID = "fillbar";
     private static final String DECOYS_TEXT = "Decoys";
     private static final String DECOY_ID = "decoy";
-    private static final Color AMBIENT_LIGHT = new Color(0.01f, 0.01f, 0.02f, 1.0f);
+    private static final Color AMBIENT_LIGHT = new Color(0.04f, 0.04f, 0.08f, 1.0f);
 
     private enum State {
         PLAYING,
@@ -256,10 +256,10 @@ public class GameScreen extends ScreenAdapter {
             batch.draw(entity.getSprite(), position.x, position.y, 1, 1);
         });
 
-        if (attackTime > 0 && !attackAnim.isAnimationFinished(attackTime)) {
-            // TODO: Change attack anim position to enemy's target's position (not always player, can be a decoy entity)
+        GameEntity target = null;
+        if (attackTime > 0 && !attackAnim.isAnimationFinished(attackTime) && (target = enemy.getCurrentTarget()) != null) {
             final TextureRegion attackFrame = attackAnim.getKeyFrame(attackTime, false);
-            batch.draw(attackFrame, playerPosition.x, playerPosition.y, 1, 1);
+            batch.draw(attackFrame, target.getPosition().x, target.getPosition().y, 1, 1);
         }
 
         batch.end();
