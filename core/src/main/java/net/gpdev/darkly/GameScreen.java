@@ -126,7 +126,7 @@ public class GameScreen extends ScreenAdapter {
         final Vector2 position = level.getPosition(PLAYER_START);
         final TextureRegion playerSprite = sprites.findRegion(PLAYER_SPRITE);
         final Rectangle boundingBox = new Rectangle((TILE_SIZE - PLAYER_WIDTH) / 2.0f, (TILE_SIZE - PLAYER_HEIGHT) / 2.0f,
-                PLAYER_WIDTH, PLAYER_HEIGHT / 2.0f);
+            PLAYER_WIDTH, PLAYER_HEIGHT / 2.0f);
         player = new PlayerEntity(new Sprite(playerSprite), position, PLAYER_SPEED, boundingBox, true, new Sprite(flashlightTexture));
         final Sprite heroLight = new Sprite(lightTexture);
         heroLight.setColor(Color.LIGHT_GRAY);
@@ -379,7 +379,7 @@ public class GameScreen extends ScreenAdapter {
         messageText.setText(message);
         messageText.setFontScale(2.0f);
         messageText.setPosition((uiStage.getWidth() - messageText.getPrefWidth()) / 2.0f,
-                (uiStage.getHeight() - messageText.getPrefHeight()) / 2.0f, Align.center);
+            (uiStage.getHeight() - messageText.getPrefHeight()) / 2.0f, Align.center);
         state = State.GAME_OVER;
     }
 

@@ -90,8 +90,8 @@ public class GameLevel implements Disposable {
     public List<GameEntity> getEntitiesInRange(final GameEntity self, final Vector2 position, final float range) {
         final float range2 = range * range;
         return entities.stream()
-                .filter(entity -> entity != self && entity.getPosition().dst2(position) <= range2)
-                .collect(Collectors.toList());
+            .filter(entity -> entity != self && entity.getPosition().dst2(position) <= range2)
+            .collect(Collectors.toList());
     }
 
     public List<Vector2> getFunctionalLightsPositions(final GameEntity self, final Vector2 position) {

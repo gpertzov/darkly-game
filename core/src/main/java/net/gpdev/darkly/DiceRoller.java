@@ -18,9 +18,9 @@ public class DiceRoller {
 
     List<Integer> roll(final int numDice, final int numSides) {
         return IntStream
-                .generate(() -> random.nextInt(numSides) + 1)
-                .limit(numDice)
-                .boxed().collect(toList());
+            .generate(() -> random.nextInt(numSides) + 1)
+            .limit(numDice)
+            .boxed().collect(toList());
     }
 
     int rollSum(final int numDice, final int numSides) {

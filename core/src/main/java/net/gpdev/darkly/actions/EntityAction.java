@@ -34,9 +34,9 @@ public abstract class EntityAction {
     @Override
     public String toString() {
         return "EntityAction{" +
-                "type=" + type +
-                ", source=" + source +
-                ", target=" + target +
-                '}';
+            "type=" + type +
+            ", source=" + source +
+            ", target=" + target +
+            '}';
     }
 }

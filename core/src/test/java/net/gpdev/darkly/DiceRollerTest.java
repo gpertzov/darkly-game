@@ -38,10 +38,10 @@ public class DiceRollerTest {
         for (int i = 0; i < REPETITIONS; i++) {
             final List<Integer> results = diceRoller.roll(3, 6);
             assertEquals(3, results.size());
-           results.forEach(roll -> {
-               assertTrue(roll >= 1);
-               assertTrue(roll <= 6);
-           });
+            results.forEach(roll -> {
+                assertTrue(roll >= 1);
+                assertTrue(roll <= 6);
+            });
         }
     }
 
