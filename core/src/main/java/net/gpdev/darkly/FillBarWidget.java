@@ -10,9 +10,9 @@ import static com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
  * Fill-bar Widget
  */
 public class FillBarWidget extends WidgetGroup {
-    private Image fillBarImage;
+    private final Image fillBarImage;
 
-    public FillBarWidget(AtlasRegion barRegion, AtlasRegion fillbarRegion, Color color) {
+    public FillBarWidget(final AtlasRegion barRegion, final AtlasRegion fillbarRegion, final Color color) {
         final Image barImage = new Image(barRegion);
         fillBarImage = new Image(fillbarRegion);
         fillBarImage.setPosition(fillbarRegion.offsetX, fillbarRegion.offsetY);
@@ -26,7 +26,7 @@ public class FillBarWidget extends WidgetGroup {
      *
      * @param value 0.0f - 1.0f
      */
-    public void setValue(float value) {
+    public void setValue(final float value) {
         fillBarImage.setWidth(fillBarImage.getPrefWidth() * value);
     }
 }
