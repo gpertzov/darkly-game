@@ -1,10 +1,12 @@
-sourceCompatibility = 1.8
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-sourceSets.main.java.srcDirs = ["src/main/java"]
-sourceSets.test.java.srcDirs = ["src/test/java"]
+test {
+  useJUnit()
+}
 
+dependencies {
+  api "com.badlogicgames.ashley:ashley:$ashleyVersion"
+  api "com.badlogicgames.gdx:gdx:$gdxVersion"
 
-eclipse.project {
-    name = appName + "-core"
+  testImplementation "junit:junit:$jUnitVersion"
 }
