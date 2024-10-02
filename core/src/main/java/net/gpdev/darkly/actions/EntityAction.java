@@ -6,7 +6,8 @@ public abstract class EntityAction {
     public enum Type {
         IDLE,
         MOVE,
-        ATTACK
+        ATTACK,
+        DESTROY
     }
 
     private final Type type;

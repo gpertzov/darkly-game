@@ -25,10 +25,8 @@ import net.gpdev.darkly.actors.EnemyEntity;
 import net.gpdev.darkly.actors.GameEntity;
 import net.gpdev.darkly.actors.PlayerEntity;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
+import java.util.*;
 
 import static com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import static net.gpdev.darkly.DarklyGame.FLASHLIGHT;
@@ -245,7 +243,6 @@ public class GameScreen extends ScreenAdapter {
         mapRenderer.render();
 
         // Render entities
-        final Vector2 enemyPosition = enemy.getPosition();
         final float attackTime = enemy.getAttackTime();
 
         batch.begin();
@@ -256,7 +253,7 @@ public class GameScreen extends ScreenAdapter {
             batch.draw(entity.getSprite(), position.x, position.y, 1, 1);
         });
 
-        GameEntity target = null;
+        GameEntity target;
         if (attackTime > 0 && !attackAnim.isAnimationFinished(attackTime) && (target = enemy.getCurrentTarget()) != null) {
             final TextureRegion attackFrame = attackAnim.getKeyFrame(attackTime, false);
             batch.draw(attackFrame, target.getPosition().x, target.getPosition().y, 1, 1);
@@ -299,13 +296,8 @@ public class GameScreen extends ScreenAdapter {
     }
 
     private void update(final float delta) {
-        // Update player entity
-        final EntityAction playerAction = player.update(delta);
-        actionQueue.addLast(playerAction);
-
-        // Update enemy entity
-        final EntityAction enemyAction = enemy.update(delta);
-        actionQueue.addLast(enemyAction);
+        final List<GameEntity> entities = level.getEntities();
+        entities.forEach(entity -> actionQueue.addLast(entity.update(delta)));
 
         // Handle action queue
         executeEntityActions();
@@ -336,6 +328,7 @@ public class GameScreen extends ScreenAdapter {
     }
 
     private void executeEntityActions() {
+        final Set<GameEntity> entitiesToBeRemoved = new HashSet<>();
         final Iterator<EntityAction> actionIterator = actionQueue.iterator();
         while (actionIterator.hasNext()) {
             final EntityAction action = actionIterator.next();
@@ -369,10 +362,16 @@ public class GameScreen extends ScreenAdapter {
 
                 }
                 break;
+                case DESTROY: {
+                    entitiesToBeRemoved.add(action.getSource());
+                }
+                break;
                 default:
                     throw new RuntimeException("Invalid entity action: " + action.getType());
             }
         }
+
+        entitiesToBeRemoved.forEach(entity -> level.removeEntity(entity));
     }
 
     private void endGame(final String message) {

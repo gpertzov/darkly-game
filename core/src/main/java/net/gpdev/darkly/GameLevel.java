@@ -83,8 +83,12 @@ public class GameLevel implements Disposable {
         return position.scl(unitScale);
     }
 
-    public void addEntity(final GameEntity entity) {
-        entities.add(entity);
+    public boolean addEntity(final GameEntity entity) {
+        return entities.add(entity);
+    }
+
+    public boolean removeEntity(final GameEntity entity) {
+        return entities.remove(entity);
     }
 
     public List<GameEntity> getEntitiesInRange(final GameEntity self, final Vector2 position, final float range) {

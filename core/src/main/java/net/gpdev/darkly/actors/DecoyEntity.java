@@ -5,11 +5,15 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import net.gpdev.darkly.Light;
 import net.gpdev.darkly.TriggeredEvent;
+import net.gpdev.darkly.actions.Destroy;
 import net.gpdev.darkly.actions.EntityAction;
 
 import static net.gpdev.darkly.Light.LIGHT_DEFAULT_INTENSITY;
+import static net.gpdev.darkly.actions.Idle.IDLE_ACTION;
 
 public class DecoyEntity extends GameEntity {
+
+    private float health = 0.3f;
 
     public DecoyEntity(final Sprite sprite,
                        final Vector2 position,
@@ -24,13 +28,26 @@ public class DecoyEntity extends GameEntity {
 
     @Override
     public EntityAction update(final float delta) {
-        return super.update(delta);
+        super.update(delta);
+
+        if (health <= 0) {
+            return new Destroy(this);
+        }
+
         // TODO: Decay light intensity over time
+
+        return IDLE_ACTION;
     }
 
     @Override
     public void reactTo(final TriggeredEvent event) {
         super.reactTo(event);
-        // TODO: Handle attack damage
+
+        final float amount = event.getAmount() / 100f;
+        final TriggeredEvent.Type eventType = event.getType();
+
+        if (TriggeredEvent.Type.HARM.equals(eventType)) {
+            health -= amount;
+        }
     }
 }
