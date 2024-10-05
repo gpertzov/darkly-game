@@ -4,18 +4,18 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 
 public class Light {
 
-    public static final int LIGHT_DEFAULT_INTENSITY = 100;
+    public static final float LIGHT_DEFAULT_INTENSITY = 1f;
     private final Sprite sprite;
     private boolean enabled;
     private final boolean functional;
 
-    private int intensity;
+    private float intensity;
 
     public Light(final Sprite sprite, final boolean enabled) {
         this(sprite, enabled, false, LIGHT_DEFAULT_INTENSITY);
     }
 
-    public Light(final Sprite sprite, final boolean enabled, final boolean functional, final int intensity) {
+    public Light(final Sprite sprite, final boolean enabled, final boolean functional, final float intensity) {
         this.sprite = sprite;
         this.enabled = enabled;
         this.functional = functional;
@@ -40,5 +40,13 @@ public class Light {
 
     public void toggle() {
         enabled = !enabled;
+    }
+
+    public float getIntensity() {
+        return intensity;
+    }
+
+    public void setIntensity(float intensity) {
+        this.intensity = intensity;
     }
 }

@@ -98,8 +98,8 @@ public class GameLevel implements Disposable {
             .collect(Collectors.toList());
     }
 
-    public List<Vector2> getFunctionalLightsPositions(final GameEntity self, final Vector2 position) {
-        final List<Vector2> lightPositions = new ArrayList<>();
+    public List<LightData> getFunctionalLights(final GameEntity self, final Vector2 position) {
+        final List<LightData> lightsData = new ArrayList<>();
         for (final GameEntity entity : entities) {
             if (entity == self) {
                 continue;
@@ -107,11 +107,11 @@ public class GameLevel implements Disposable {
             final Collection<Light> lights = entity.getLights();
             for (final Light light : lights) {
                 if (light.isFunctional() && light.isEnabled()) {
-                    lightPositions.add(entity.getPosition());
+                    lightsData.add(new LightData(entity.getPosition(), light.getIntensity()));
                 }
             }
         }
-        return lightPositions;
+        return lightsData;
     }
 
     public boolean isOutOfBounds(final Rectangle rect) {

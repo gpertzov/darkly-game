@@ -13,7 +13,9 @@ import static net.gpdev.darkly.actions.Idle.IDLE_ACTION;
 
 public class DecoyEntity extends GameEntity {
 
+    private static final float INTENSITY_DECAY_FACTOR = 0.2f;
     private float health = 0.3f;
+    private final Light light;
 
     public DecoyEntity(final Sprite sprite,
                        final Vector2 position,
@@ -22,7 +24,7 @@ public class DecoyEntity extends GameEntity {
                        final boolean isCollidable,
                        final Sprite lightSprite) {
         super(sprite, position, speed, boundingBox, isCollidable);
-        final Light light = new Light(lightSprite, true, true, LIGHT_DEFAULT_INTENSITY * 2);
+        light = new Light(lightSprite, true, true, LIGHT_DEFAULT_INTENSITY * 2);
         addLight("decoy", light);
     }
 
@@ -34,7 +36,12 @@ public class DecoyEntity extends GameEntity {
             return new Destroy(this);
         }
 
-        // TODO: Decay light intensity over time
+        final float intensity = light.getIntensity();
+        if (intensity <= 0) {
+            return new Destroy(this);
+        }
+
+        light.setIntensity(intensity - (delta * INTENSITY_DECAY_FACTOR));
 
         return IDLE_ACTION;
     }

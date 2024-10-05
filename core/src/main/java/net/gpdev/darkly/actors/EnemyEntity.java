@@ -1,15 +1,17 @@
 package net.gpdev.darkly.actors;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import net.gpdev.darkly.LightData;
 import net.gpdev.darkly.actions.Attack;
 import net.gpdev.darkly.actions.EntityAction;
 import net.gpdev.darkly.actions.Move;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import static net.gpdev.darkly.actions.Idle.IDLE_ACTION;
 
@@ -62,7 +64,6 @@ public class EnemyEntity extends GameEntity {
         ENEMY_STATE state;
         if (!targets.isEmpty()) {
             // INTERCEPT //
-            // TODO: Target most intense light
             currentTarget = targets.get(0);
             final Vector2 dirToTarget = currentTarget.getPosition().sub(getPosition());
             if (dirToTarget.len2() > INTERCEPT_RADIUS_2) {
@@ -86,11 +87,11 @@ public class EnemyEntity extends GameEntity {
             currentTarget = null;
 
             // Detect suspicious light sources
-            final List<Vector2> functionalLightsPositions = level.getFunctionalLightsPositions(this, getPosition());
-            if (!functionalLightsPositions.isEmpty()) {
-                // TODO: Home-in on most intense light
-                // Set a course to the position of the first light
-                final Vector2 lightPosition = functionalLightsPositions.get(0);
+            final List<LightData> functionalLights = level.getFunctionalLights(this, getPosition());
+            Optional<LightData> mostIntenseLight = functionalLights.stream().max(Comparator.comparing(LightData::intensity));
+            if (mostIntenseLight.isPresent()) {
+                // Home-in on most intense light
+                final Vector2 lightPosition = mostIntenseLight.get().position();
                 final Vector2 sub = lightPosition.sub(getPosition());
                 distanceToMove = sub.len();
                 setDirection(sub);
